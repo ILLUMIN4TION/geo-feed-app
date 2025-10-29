@@ -1,16 +1,12 @@
 # geofeed
 
-A new Flutter project.
+## Flutter SDK version : 3.35.3
 
-## Getting Started
+##팀원: 남재현 (1인 개발)
 
-This project is a starting point for a Flutter application.
+ㄷ# geofeed
 
-A few resources to get you started if this is your first Flutter project:
+## Flutter SDK version : 3.35.3
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+##팀원: 남재현 (1인 개발)
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
