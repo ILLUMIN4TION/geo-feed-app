@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "880073372925",
+    "project_id": "geofeed-1b88f",
+    "storage_bucket": "geofeed-1b88f.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:880073372925:android:2961ff38b4c92701d13a94",
+        "android_client_info": {
+          "package_name": "com.example.geofeed"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCWSuoa0rbp4coAp-X7AYTHGSd7dXL0_Ww"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
