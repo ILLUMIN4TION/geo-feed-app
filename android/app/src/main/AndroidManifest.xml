@@ -3,6 +3,10 @@
         android:label="geofeed"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
+
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyBRGVueK2KGu-e7c0R_7WX0WtyxMASxl8E"/>
         <activity
             android:name=".MainActivity"
             android:exported="true"
