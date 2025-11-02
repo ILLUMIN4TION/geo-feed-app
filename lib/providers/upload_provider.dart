@@ -11,6 +11,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:exif/exif.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
+import 'package:permission_handler/permission_handler.dart'; // 1. permission_handler 임포트
 
 class UploadProvider extends BaseProvider {
   final ImagePicker _picker = ImagePicker();
@@ -27,11 +28,29 @@ class UploadProvider extends BaseProvider {
   UploadData? _preparedData;
   UploadData? get preparedData => _preparedData;
 
+  // (수정) 작업 1-A: UploadScreen에서 이미지 선택
   Future<void> pickImageForPreview() async {
-    final XFile? pickedFile = await _picker.pickImage(source: ImageSource.gallery);
-    if (pickedFile != null) {
-      _pickedImageFile = File(pickedFile.path);
-      notifyListeners();
+    // 1. (수정) '위치'와 '미디어 위치' 권한을 *모두* 요청
+    Map<Permission, PermissionStatus> statuses = await [
+      Permission.location,
+      Permission.accessMediaLocation, // <-- 이 권한이 핵심입니다!
+    ].request();
+
+    // 2. 두 권한이 모두 승인되었는지 확인 (특히 accessMediaLocation)
+    if (statuses[Permission.location] == PermissionStatus.granted &&
+        statuses[Permission.accessMediaLocation] == PermissionStatus.granted) {
+      
+      // 3. 권한이 승인되었을 때만 이미지 선택 진행
+      final XFile? pickedFile = await _picker.pickImage(source: ImageSource.gallery);
+      if (pickedFile != null) {
+        _pickedImageFile = File(pickedFile.path);
+        notifyListeners(); 
+      }
+    } else {
+      // 4. (신규) 권한이 하나라도 거부되었을 때
+      _errorMessage = "사진의 위치(GPS) 정보를 읽어오기 위한 권한이 필요합니다.";
+      // TODO: 사용자에게 "권한이 거부되었습니다. 설정에서 허용해주세요." 알림 띄우기
+      // openAppSettings(); // (선택) 앱 설정 화면으로 바로 보내기
     }
   }
 
