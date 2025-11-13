@@ -4,22 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="82325aeb-0a99-47e4-96f4-c29a76787eba" name="변경" comment="">
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/Dart_SDK.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/libraries/Dart_SDK.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/android/app/google-services.json" beforeDir="false" afterPath="$PROJECT_DIR$/android/app/google-services.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/geofeed.iml" beforeDir="false" afterPath="$PROJECT_DIR$/geofeed.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/providers/upload_provider.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/providers/upload_provider.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/screens/home_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/screens/home_screen.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/widgets/post_card.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/widgets/post_card.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/linux/flutter/generated_plugin_registrant.cc" beforeDir="false" afterPath="$PROJECT_DIR$/linux/flutter/generated_plugin_registrant.cc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/linux/flutter/generated_plugins.cmake" beforeDir="false" afterPath="$PROJECT_DIR$/linux/flutter/generated_plugins.cmake" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/macos/Flutter/GeneratedPluginRegistrant.swift" beforeDir="false" afterPath="$PROJECT_DIR$/macos/Flutter/GeneratedPluginRegistrant.swift" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pubspec.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/pubspec.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/windows/flutter/generated_plugin_registrant.cc" beforeDir="false" afterPath="$PROJECT_DIR$/windows/flutter/generated_plugin_registrant.cc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/windows/flutter/generated_plugins.cmake" beforeDir="false" afterPath="$PROJECT_DIR$/windows/flutter/generated_plugins.cmake" afterDir="false" />
-    </list>
+    <list default="true" id="82325aeb-0a99-47e4-96f4-c29a76787eba" name="변경" comment="3주차 교수님 피드백 중 해결 한 부분&#10;&#10;로그아웃 시 피드백 (완료)&#10;&#10;업로드 전 포매팅 및 ISO 타입 변경(완료)&#10;&#10;OAuth 보안 (부분 완료)&#10;gitIgnore 완료&#10;구글클라우드콘솔에서 설정 변경(미완료) &lt;- 집PC를 기준으로 꼭 등록하기" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -49,6 +34,12 @@
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
+  <component name="GithubPullRequestsUISettings"><![CDATA[{
+  "selectedUrlAndAccountId": {
+    "url": "https://github.com/ILLUMIN4TION/geo-feed-app.git",
+    "accountId": "62d71db5-ccd3-469d-b745-b638a8aea6fd"
+  }
+}]]></component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 8
 }</component>
@@ -114,8 +105,17 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1763006297887</updated>
-      <workItem from="1763006299433" duration="11436000" />
+      <workItem from="1763006299433" duration="11787000" />
     </task>
+    <task id="LOCAL-00001" summary="3주차 교수님 피드백 중 해결 한 부분&#10;&#10;로그아웃 시 피드백 (완료)&#10;&#10;업로드 전 포매팅 및 ISO 타입 변경(완료)&#10;&#10;OAuth 보안 (부분 완료)&#10;gitIgnore 완료&#10;구글클라우드콘솔에서 설정 변경(미완료) &lt;- 집PC를 기준으로 꼭 등록하기">
+      <option name="closed" value="true" />
+      <created>1763019230700</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1763019230700</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="ToolWindowManager">
@@ -126,5 +126,20 @@
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="3주차 교수님 피드백 중 해결 한 부분&#10;&#10;로그아웃 시 피드백 (완료)&#10;&#10;업로드 전 포매팅 및 ISO 타입 변경(완료)&#10;&#10;OAuth 보안 (부분 완료)&#10;gitIgnore 완료&#10;구글클라우드콘솔에서 설정 변경(미완료) &lt;- 집PC를 기준으로 꼭 등록하기" />
+    <option name="LAST_COMMIT_MESSAGE" value="3주차 교수님 피드백 중 해결 한 부분&#10;&#10;로그아웃 시 피드백 (완료)&#10;&#10;업로드 전 포매팅 및 ISO 타입 변경(완료)&#10;&#10;OAuth 보안 (부분 완료)&#10;gitIgnore 완료&#10;구글클라우드콘솔에서 설정 변경(미완료) &lt;- 집PC를 기준으로 꼭 등록하기" />
   </component>
 </project>
