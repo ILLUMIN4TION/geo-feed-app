@@ -30,13 +30,13 @@ class UploadProvider extends BaseProvider {
 
   // (수정) 작업 1-A: UploadScreen에서 이미지 선택
   Future<void> pickImageForPreview() async {
-    // 1. (수정) '위치'와 '미디어 위치' 권한을 *모두* 요청
+    // 1. (수정) '위치'와 '미디어 위치' 권한을 모두 요청
     Map<Permission, PermissionStatus> statuses = await [
       Permission.location,
-      Permission.accessMediaLocation, // <-- 이 권한이 핵심입니다!
+      Permission.accessMediaLocation, // 필수
     ].request();
 
-    // 2. 두 권한이 모두 승인되었는지 확인 (특히 accessMediaLocation)
+    // 2. 두 권한이 모두 승인되었는지 확인 (특히 accessMediaLocation)<- 없으면 사진에서 GPS 데이터를 가져올 수가 없음!!!!
     if (statuses[Permission.location] == PermissionStatus.granted &&
         statuses[Permission.accessMediaLocation] == PermissionStatus.granted) {
       

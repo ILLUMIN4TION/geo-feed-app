@@ -105,12 +105,26 @@ class ConfirmUploadScreen extends StatelessWidget {
             
             // 3. EXIF 정보 (Chip)
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12.0),
+              padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0), // 패딩 조정
               child: Text("촬영 정보 (EXIF)", style: Theme.of(context).textTheme.titleMedium),
             ),
+            
+            // --- (수정된 부분) ---
             Padding(
-              padding: const EdgeInsets.all(12.0),
-              child: Wrap(spacing: 8.0, runSpacing: 4.0, children: exifWidgets),
+              padding: const EdgeInsets.fromLTRB(12.0, 0, 12.0, 12.0), // 패딩 조정
+              child: exifWidgets.isEmpty // 1. 리스트가 비어있는지 확인
+                  ? const Padding( // 2. 비어있다면: "정보 없음" 표시
+                      padding: EdgeInsets.symmetric(vertical: 16.0),
+                      child: Center(
+                        child: Text("이 사진에는 촬영 정보가 없습니다.",
+                            style: TextStyle(color: Colors.grey)),
+                      ),
+                    )
+                  : Wrap( // 3. 비어있지 않다면: Chip 표시
+                      spacing: 8.0,
+                      runSpacing: 4.0,
+                      children: exifWidgets,
+                    ),
             ),
             const Divider(),
 

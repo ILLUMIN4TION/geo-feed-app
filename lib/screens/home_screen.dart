@@ -6,8 +6,7 @@ import 'package:geofeed/screens/main_feed_screen.dart';
 import 'package:geofeed/screens/upload_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:geofeed/screens/main_map_screen.dart';
-// TODO: (2단계에서 생성)
-// import 'main_feed_screen.dart';
+import 'package:geofeed/screens/profile_screen.dart'; // 1. ProfileScreen 임포트
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -19,9 +18,8 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
 
-  // 2. 탭에 연결할 스크린 목록 (수정)
   final List<Widget> _screens = [
-    const MainMapScreen(), // 0번 (W4)
+    const MainMapScreen(),
     const MainFeedScreen(),
   ];
 
@@ -37,12 +35,24 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(
         title: Text(_selectedIndex == 0 ? '포토스팟 지도' : 'Geo-Feed'),
         actions: [
+          // 2. (신규) 프로필 아이콘 버튼
+          IconButton(
+            icon: const Icon(Icons.account_circle_outlined),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const ProfileScreen()),
+              );
+            },
+          ),
+          
+          // 3. 로그아웃 버튼
           IconButton(
             icon: const Icon(Icons.logout),
             onPressed: () {
               context.read<MyAuthProvider>().signOut();
             },
-          )
+          ),
         ],
       ),
       

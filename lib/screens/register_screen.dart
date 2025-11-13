@@ -1,7 +1,7 @@
 // lib/screens/register_screen.dart
 
 import 'package:flutter/material.dart';
-import 'package:geofeed/providers/my_auth_provider.dart'; // 이름 변경 반영
+import 'package:geofeed/providers/my_auth_provider.dart';
 import 'package:geofeed/utils/view_state.dart';
 import 'package:provider/provider.dart';
 
@@ -13,8 +13,10 @@ class RegisterScreen extends StatelessWidget {
     final TextEditingController emailController = TextEditingController();
     final TextEditingController passwordController = TextEditingController();
     final TextEditingController confirmPasswordController = TextEditingController();
+    
+    // 1. (신규) 닉네임 컨트롤러 추가
+    final TextEditingController usernameController = TextEditingController();
 
-    // 상태 변화(로딩, 에러)를 UI에 반영하기 위해 watch 사용
     final authProvider = context.watch<MyAuthProvider>();
 
     return Scaffold(
@@ -47,6 +49,19 @@ class RegisterScreen extends StatelessWidget {
                   keyboardType: TextInputType.emailAddress,
                 ),
                 const SizedBox(height: 20),
+
+                // 2. (신규) 닉네임 입력 필드
+                TextField(
+                  controller: usernameController,
+                  decoration: const InputDecoration(
+                    labelText: '닉네임',
+                    border: OutlineInputBorder(),
+                    prefixIcon: Icon(Icons.person),
+                  ),
+                  keyboardType: TextInputType.text,
+                ),
+                const SizedBox(height: 20),
+
                 TextField(
                   controller: passwordController,
                   decoration: const InputDecoration(
@@ -80,7 +95,7 @@ class RegisterScreen extends StatelessWidget {
                             ),
                           ),
                           onPressed: () async {
-                            // 1. 비밀번호 확인
+                            // 비밀번호 확인
                             if (passwordController.text != confirmPasswordController.text) {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
@@ -88,20 +103,30 @@ class RegisterScreen extends StatelessWidget {
                                   backgroundColor: Colors.orangeAccent,
                                 ),
                               );
-                              return; // 함수 종료
+                              return;
+                            }
+                            
+                            // (신규) 닉네임 비어있는지 확인
+                            if (usernameController.text.trim().isEmpty) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text("닉네임을 입력해주세요."),
+                                  backgroundColor: Colors.orangeAccent,
+                                ),
+                              );
+                              return;
                             }
 
-                            // 2. 회원가입 시도 (Provider 호출은 read)
+                            // 3. (수정) 회원가입 시 닉네임 전달
                             bool success = await context.read<MyAuthProvider>().signUp(
                                   email: emailController.text.trim(),
                                   password: passwordController.text.trim(),
+                                  username: usernameController.text.trim(), // 닉네임 전달
                                 );
 
                             if (success && context.mounted) {
-                              // 성공 시: 로그인 화면으로 자동 복귀 (AuthWrapper가 홈으로 보내줌)
-                              Navigator.pop(context);
+                              Navigator.pop(context); // 로그인 화면으로 복귀
                             } else if (!success && context.mounted) {
-                              // 실패 시: 에러 메시지 표시
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
                                   content: Text(

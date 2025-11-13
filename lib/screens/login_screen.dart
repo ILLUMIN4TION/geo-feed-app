@@ -91,6 +91,50 @@ class LoginScreen extends StatelessWidget {
                           child: const Text('로그인', style: TextStyle(fontSize: 18)),
                         ),
                       ),
+                      const SizedBox(height: 20),
+
+                // --- (신규) Google 로그인 버튼 ---
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    icon: Image.asset( // TODO: 'assets/images/google_logo.png' 같은 로고 이미지 필요
+                      'assets/images/google_logo.png', 
+                      height: 24.0,
+                    ),
+                    label: const Text('Google 계정으로 로그인', style: TextStyle(fontSize: 16)),
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      backgroundColor: Colors.white,
+                      foregroundColor: Colors.black87,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        side: const BorderSide(color: Colors.grey),
+                      ),
+                    ),
+                    onPressed: () async {
+                      // 1. 로딩 상태가 아닐 때만 실행
+                      if (authProvider.state == ViewState.Loading) return;
+
+                      // 2. Google 로그인 메서드 호출
+                      bool success = await context.read<MyAuthProvider>().signInWithGoogle();
+                      
+                      if (!success && context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              context.read<MyAuthProvider>().errorMessage ?? "Google 로그인 실패"
+                            ),
+                            backgroundColor: Colors.redAccent,
+                          ),
+                        );
+                      }
+                      // 성공 시 AuthWrapper가 알아서 홈으로 이동
+                    },
+                  ),
+                ),
+                // --- (여기까지 신규) ---
+
+                const SizedBox(height: 10),
                 const SizedBox(height: 20),
                 TextButton(
                   onPressed: () {

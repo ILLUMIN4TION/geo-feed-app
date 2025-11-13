@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:geofeed/models/post.dart';
 import 'package:geofeed/providers/post_provider.dart';
+// import 'package:geofeed/screens/post_detail_screen.dart'; 
+import 'package:geofeed/widgets/map_post_preview.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
 
 class MainMapScreen extends StatelessWidget {
   const MainMapScreen({super.key});
 
-  // (W4) List<Post>를 Set<Marker>로 변환하는 헬퍼 함수
-  Set<Marker> _createMarkers(List<Post> posts) {
+  // List<Post>를 Set<Marker>로 변환하는 헬퍼 
+  Set<Marker> _createMarkers(BuildContext context, List<Post> posts) {
     return posts
-        .where((post) => post.location != null) // 1. 위치 정보가 있는 게시물만 필터링
+        .where((post) => post.location != null)
         .map((post) {
           return Marker(
             markerId: MarkerId(post.id),
@@ -18,17 +20,27 @@ class MainMapScreen extends StatelessWidget {
               post.location.latitude,
               post.location.longitude,
             ),
-            infoWindow: InfoWindow(
-              title: post.caption.isNotEmpty ? post.caption : "포토스팟",
-              snippet: "탭하여 상세 정보 보기", // TODO: 탭 이벤트 구현
-            ),
-            // TODO: (선택) 마커 탭 시, 해당 게시물 상세 팝업 표시
             onTap: () {
-              // print("Tapped on post: ${post.id}");
+              // 4. (신규) BottomSheet 띄우는 함수 호출
+              _showPostPreviewSheet(context, post);
             },
           );
         })
-        .toSet(); // 2. Set으로 변환
+        .toSet();
+  }
+
+  // 5. (신규) ModalBottomSheet를 띄우는 헬퍼 함수
+  void _showPostPreviewSheet(BuildContext context, Post post) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder( // 모서리 둥글게
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        // 6. 1단계에서 만든 위젯 반환
+        return MapPostPreview(post: post);
+      },
+    );
   }
 
   @override
@@ -51,14 +63,20 @@ class MainMapScreen extends StatelessWidget {
 
         // 7. 데이터 수신 성공
         final posts = snapshot.data!;
-        final markers = _createMarkers(posts); // 헬퍼 함수 호출
+        final markers = _createMarkers(context, posts);
 
         return GoogleMap(
           initialCameraPosition: const CameraPosition(
-            target: LatLng(37.5665, 126.9780), // 8. 초기 카메라 위치 (서울)
+            target: LatLng(37.5665, 126.9780), //TODO 8. 초기 카메라 위치 (서울) <- 현재 위치로 수정해야함
             zoom: 12,
           ),
           markers: markers, // 9. 생성된 마커(핀) 세트 표시
+
+          //내 위치를 점으로 표시하는 기능 사용
+          myLocationEnabled: true, 
+          
+          //내 위치로 이동 버튼 사용
+          myLocationButtonEnabled: true,
         );
       },
     );
