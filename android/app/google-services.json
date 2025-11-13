@@ -12,7 +12,16 @@
           "package_name": "com.example.geofeed"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "880073372925-toql8nb9fn9qio4s3b4tsiu6re45m1ti.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.geofeed",
+            "certificate_hash": "956677ccd32788231c8c08bb09d425cfcc5db759"
+          }
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyCWSuoa0rbp4coAp-X7AYTHGSd7dXL0_Ww"

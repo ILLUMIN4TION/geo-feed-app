@@ -46,11 +46,37 @@ class _HomeScreenState extends State<HomeScreen> {
             },
           ),
           
-          // 3. 로그아웃 버튼
+          // 3. 로그아웃 버튼 (교수님 피드백 적용하기 -> 다이얼로그 띄우기)
           IconButton(
             icon: const Icon(Icons.logout),
             onPressed: () {
-              context.read<MyAuthProvider>().signOut();
+              showDialog(
+                  context: context,
+                  builder: (BuildContext dialogContext) {
+                    return AlertDialog(
+                      title: const Text("로그아웃"),
+                      content: const Text("정말로 로그아웃 하시겠습니까?"),
+                      actions: [
+                        TextButton(
+                          child: const Text("취소"),
+                          onPressed: (){
+                            Navigator.of(dialogContext).pop();
+                          },
+                        ),
+                        TextButton(
+                          child: const Text(
+                            "로그아웃",
+                            style: TextStyle(color: Colors.red)
+                            ),
+                          onPressed: (){
+                            context.read<MyAuthProvider>().signOut();
+                            Navigator.of(dialogContext).pop();
+                          },
+                        ),
+                      ],
+                    );
+                  },
+              );
             },
           ),
         ],

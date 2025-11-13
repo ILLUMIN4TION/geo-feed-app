@@ -121,17 +121,96 @@ class UploadProvider extends BaseProvider {
   }
 
   // --- Helper Methods (에러 해결 부분) ---
-  
+
+  // --- (수정) Helper 1: 촬영 설정(EXIF) 파싱 및 포맷팅 ---
   Map<String, dynamic> _parseExifMetadata(Map<String, IfdTag> data) {
     if (data.isEmpty) return {};
+
+    // 1. 원본 String 값 추출
+    String apertureRaw = data['EXIF FNumber']?.toString() ?? 'N/A';
+    String shutterRaw = data['EXIF ExposureTime']?.toString() ?? 'N/A';
+    String isoRaw = data['EXIF ISOSpeedRatings']?.toString() ?? 'N/A';
+
+    // 2. (신규) Firestore에 저장할 값으로 포맷팅
+    int? isoNumber = int.tryParse(isoRaw); // "50" -> 50
+    String shutterFormatted = _formatShutterSpeed(shutterRaw);
+    String apertureFormatted = _formatAperture(apertureRaw);
+
     return {
       'Make': data['Image Make']?.toString(),
       'Model': data['Image Model']?.toString(),
-      'Aperture': data['EXIF FNumber']?.toString(),
-      'ShutterSpeed': data['EXIF ExposureTime']?.toString(),
-      'ISO': data['EXIF ISOSpeedRatings']?.toString(),
-      'FocalLength': data['EXIF FocalLength']?.toString(),
+
+      // (수정) 포맷팅된 값 저장
+      'Aperture': (apertureFormatted == 'N/A') ? null : apertureFormatted,
+      'ShutterSpeed': (shutterFormatted == 'N/A') ? null : shutterFormatted,
+
+      // (수정) ISO를 String이 아닌 Number(int)로 저장
+      'ISO': isoNumber, // "250"이 아닌 250으로 저장됨 (null일 수도 있음)
+
+      // (수정) FocalLength도 "mm"를 붙여서 저장
+      'FocalLength': _formatFocalLength(data['EXIF FocalLength']?.toString() ?? 'N/A'),
     };
+  }
+
+  // 포매팅을 위한 헬퍼 함수들 위의 _parseExifdata에 사용함
+
+  String _formatFocalLength(String text) {
+    if (text == 'N/A' || text.isEmpty) return 'N/A';
+    if (text.endsWith('mm')) return text;
+    try {
+      double value;
+      if (text.contains('/')) {
+        final parts = text.split('/');
+        value = double.parse(parts[0]) / double.parse(parts[1]);
+      } else {
+        value = double.parse(text);
+      }
+      return '${value.toStringAsFixed(value.truncateToDouble() == value ? 0 : 1)}mm';
+    } catch (e) {
+      return text;
+    }
+  }
+
+
+  String _formatAperture(String text) {
+    if (text == 'N/A' || text.isEmpty) return 'N/A';
+    if (text.startsWith('f/')) return text; //f/처럼 처음부터 명확한 조리개 값이 들어올 경우에는 바로 return합니다
+
+    try {
+      double value;
+      if (text.contains('/')) { //text에 값에 /가 포함되어있으면
+        final parts = text.split('/'); // '/'를 기준으로 나누고 parts에 저장합니다.
+        value = double.parse(parts[0]) / double.parse(parts[1]);
+      } else {
+        value = double.parse(text);
+      }
+      return 'f/${value.toStringAsFixed(1)}';
+    } catch (e) {
+      return text;
+    }
+  }
+
+  String _formatShutterSpeed(String text) {
+    if (text == 'N/A' || text.isEmpty) return 'N/A';
+    if (text.endsWith('s')) return text;
+
+    try {
+      if (text.contains('/')) {
+        final parts = text.split('/');
+        double value = double.parse(parts[0]) / double.parse(parts[1]);
+
+        if (value < 1.0) {
+          return '1/${(1 / value).round()}s';
+        } else {
+          return '${value.toStringAsFixed(1)}s';
+        }
+      } else {
+        double value = double.parse(text);
+        return '${value.toStringAsFixed(1)}s';
+      }
+    } catch (e) {
+      return '${text}s';
+    }
   }
   
   GeoPoint? _convertGpsToGeoPoint(Map<String, IfdTag> data) {

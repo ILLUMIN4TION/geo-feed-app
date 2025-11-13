@@ -81,14 +81,17 @@ class PostCard extends StatelessWidget {
 
   // EXIF 오버레이 위젯 빌더
   Widget _buildExifOverlay(BuildContext context, Map<String, dynamic> exifData) {
-    // 원본 데이터 추출 및 포매팅
-    final apertureText = _formatAperture(exifData['Aperture']?.toString() ?? 'N/A');
-    final shutterText = _formatShutterSpeed(exifData['ShutterSpeed']?.toString() ?? 'N/A');
-    final isoText = (exifData['ISO']?.toString() ?? 'N/A') == 'N/A' ? 'N/A' : 'ISO ${exifData['ISO']}';
-    final focalLengthText = _formatFocalLength(exifData['FocalLength']?.toString() ?? 'N/A');
-    final modelText = exifData['Model']?.toString() ?? ''; // 모델은 따로 처리
+    // 1. (수정) Firestore에 저장된 포맷팅된 값을 그대로 가져옴
+    final apertureText = exifData['Aperture']?.toString() ?? 'N/A';
+    final shutterText = exifData['ShutterSpeed']?.toString() ?? 'N/A';
 
-    // 유효한 데이터가 하나도 없는지 확인
+    // 2. (수정) ISO는 Number 타입이므로 toString()으로 변환
+    final isoRaw = exifData['ISO'];
+    final isoText = (isoRaw == null) ? 'N/A' : 'ISO ${isoRaw.toString()}';
+
+    final focalLengthText = exifData['FocalLength']?.toString() ?? 'N/A';
+    final modelText = exifData['Model']?.toString() ?? '';
+
     final bool noExifData = apertureText == 'N/A' &&
         shutterText == 'N/A' &&
         isoText == 'N/A' &&
@@ -127,21 +130,17 @@ class PostCard extends StatelessWidget {
               )
             // 첫 번째 줄: 조리개, 셔터스피드
            else ...[
-              Row(
+              Wrap( // (수정) Wrap으로 변경하여 4개 표시
+                spacing: 16.0,
+                runSpacing: 8.0,
                 children: [
                   _exifIconText(Icons.camera_alt_outlined, apertureText),
-                  const SizedBox(width: 20),
                   _exifIconText(Icons.shutter_speed_outlined, shutterText),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Row(
-                children: [
                   _exifIconText(Icons.iso_outlined, isoText),
-                  const SizedBox(width: 20),
                   _exifIconText(Icons.center_focus_weak_outlined, focalLengthText),
                 ],
               ),
+              const SizedBox(height: 8),
               if (modelText.isNotEmpty && modelText != 'N/A')
                 Padding(
                   padding: const EdgeInsets.only(top: 8.0),
@@ -186,67 +185,5 @@ class PostCard extends StatelessWidget {
         ),
       ],
     );
-  }
-
-  //  초점 거리 포매터
-  String _formatFocalLength(String text) {
-    if (text == 'N/A' || text.isEmpty) return 'N/A'; // 빈 값 처리
-    if (text.endsWith('mm')) return text;
-
-    try {
-      double value;
-      if (text.contains('/')) {
-        final parts = text.split('/');
-        value = double.parse(parts[0]) / double.parse(parts[1]);
-      } else {
-        value = double.parse(text);
-      }
-      return '${value.toStringAsFixed(value.truncateToDouble() == value ? 0 : 1)}mm'; 
-    } catch (e) {
-      return text;
-    }
-  }
-
-  //  조리개 포매터
-  String _formatAperture(String text) {
-    if (text == 'N/A' || text.isEmpty) return 'N/A';
-    if (text.startsWith('f/')) return text;
-
-    try {
-      double value;
-      if (text.contains('/')) {
-        final parts = text.split('/');
-        value = double.parse(parts[0]) / double.parse(parts[1]);
-      } else {
-        value = double.parse(text);
-      }
-      return 'f/${value.toStringAsFixed(1)}';
-    } catch (e) {
-      return text;
-    }
-  }
-
-  // 셔터스피드 포매터
-  String _formatShutterSpeed(String text) {
-    if (text == 'N/A' || text.isEmpty) return 'N/A';
-    if (text.endsWith('s')) return text;
-
-    try {
-      if (text.contains('/')) {
-        final parts = text.split('/');
-        double value = double.parse(parts[0]) / double.parse(parts[1]);
-        
-        if (value < 1.0) {
-          return '1/${(1 / value).round()}s';
-        } else {
-          return '${value.toStringAsFixed(1)}s';
-        }
-      } else {
-         double value = double.parse(text);
-         return '${value.toStringAsFixed(1)}s';
-      }
-    } catch (e) {
-      return '${text}s';
-    }
   }
 }
