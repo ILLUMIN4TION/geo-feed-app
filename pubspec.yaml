@@ -37,6 +37,10 @@ dependencies:
   # 4. 핵심 기능 (Map)
   google_maps_flutter: ^2.6.1  # 포토스팟을 위한 Google 지도
 
+
+  camera: ^0.10.5+9
+
+
   permission_handler: ^11.3.1
   geocoding: ^3.0.0
   google_sign_in: ^6.2.1
