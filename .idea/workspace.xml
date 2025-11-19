@@ -5,21 +5,12 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="82325aeb-0a99-47e4-96f4-c29a76787eba" name="변경" comment="3주차 교수님 피드백 중 해결 한 부분&#10;&#10;로그아웃 시 피드백 (완료)&#10;&#10;업로드 전 포매팅 및 ISO 타입 변경(완료)&#10;&#10;OAuth 보안 (부분 완료)&#10;gitIgnore 완료&#10;구글클라우드콘솔에서 설정 변경(미완료) &lt;- 집PC를 기준으로 꼭 등록하기">
-      <change afterPath="$PROJECT_DIR$/lib/screens/edit_profile_screen.dart" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/screens/search_screen.dart" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/widgets/expandable_caption.dart" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/widgets/loading_overlay.dart" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/screens/location_picker_screen.dart" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/main.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/main.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/models/post.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/models/post.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/providers/my_auth_provider.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/providers/my_auth_provider.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/providers/post_provider.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/providers/post_provider.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/models/upload_data.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/models/upload_data.dart" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/lib/providers/upload_provider.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/providers/upload_provider.dart" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/lib/screens/confirm_upload_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/screens/confirm_upload_screen.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/screens/home_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/screens/home_screen.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/screens/post_detail_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/screens/post_detail_screen.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/screens/profile_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/screens/profile_screen.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/widgets/post_card.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/widgets/post_card.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/widgets/expandable_caption.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/widgets/expandable_caption.dart" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/lib/widgets/user_info_header.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/widgets/user_info_header.dart" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -134,6 +125,8 @@
       <workItem from="1763360304995" duration="187000" />
       <workItem from="1763361337573" duration="193000" />
       <workItem from="1763514501178" duration="11845000" />
+      <workItem from="1763528742272" duration="53000" />
+      <workItem from="1763528909658" duration="5533000" />
     </task>
     <task id="LOCAL-00001" summary="3주차 교수님 피드백 중 해결 한 부분&#10;&#10;로그아웃 시 피드백 (완료)&#10;&#10;업로드 전 포매팅 및 ISO 타입 변경(완료)&#10;&#10;OAuth 보안 (부분 완료)&#10;gitIgnore 완료&#10;구글클라우드콘솔에서 설정 변경(미완료) &lt;- 집PC를 기준으로 꼭 등록하기">
       <option name="closed" value="true" />
@@ -143,7 +136,15 @@
       <option name="project" value="LOCAL" />
       <updated>1763019230700</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="3주차 교수님 피드백 중 해결 한 부분&#10;&#10;로그아웃 시 피드백 (완료)&#10;&#10;업로드 전 포매팅 및 ISO 타입 변경(완료)&#10;&#10;OAuth 보안 (부분 완료)&#10;gitIgnore 완료&#10;구글클라우드콘솔에서 설정 변경(미완료) &lt;- 집PC를 기준으로 꼭 등록하기">
+      <option name="closed" value="true" />
+      <created>1763528755955</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1763528755955</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="ToolWindowManager">

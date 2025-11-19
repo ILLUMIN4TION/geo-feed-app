@@ -75,7 +75,8 @@ class _ExpandableCaptionState extends State<ExpandableCaption> {
                 );
               }
 
-              // 3. (핵심) 접힌 상태: "... 더보기"를 인라인으로 삽입
+              // 3. (수정) 접힌 상태: "... 더보기"를 인라인으로 삽입
+
               // "... 더보기"가 차지할 공간 계산
               const TextSpan moreSpan = TextSpan(
                 text: "... 더보기",
@@ -87,27 +88,30 @@ class _ExpandableCaptionState extends State<ExpandableCaption> {
               );
               moreTp.layout();
 
-              // 3번째 줄의 끝부분 위치 찾기
-              // (전체 너비) - ("... 더보기" 너비) 지점의 글자 인덱스를 찾음
+              // (수정 핵심) 3번째 줄의 끝부분 위치 찾기
+              // 기존: constraints.maxWidth - moreTp.width
+              // 수정: constraints.maxWidth - moreTp.width - 10 (10픽셀 여유 공간 확보)
               final pos = tp.getPositionForOffset(Offset(
-                constraints.maxWidth - moreTp.width,
-                tp.height, // 마지막 줄의 높이
+                constraints.maxWidth - moreTp.width - 10,
+                tp.height,
               ));
 
               // 잘라낼 위치 (인덱스)
               int endIndex = pos.offset;
-              // 안전장치: 텍스트 길이보다 길면 조정
-              if (endIndex > cleanText.length) endIndex = cleanText.length;
-              // 뒤쪽에 글자가 잘리는 걸 방지하기 위해 약간 여유를 둠 (선택 사항)
-              // endIndex = (endIndex - 1).clamp(0, cleanText.length);
+
+              // (추가) 안전장치: 텍스트가 잘리는 위치가 단어 중간일 수 있으므로
+              // 글자수보다 넘치지 않게 조정
+              if (endIndex > cleanText.length) {
+                endIndex = cleanText.length;
+              }
 
               return RichText(
                 text: TextSpan(
                   style: style,
                   children: [
-                    TextSpan(text: cleanText.substring(0, endIndex)), // 잘린 본문
+                    TextSpan(text: cleanText.substring(0, endIndex)),
                     TextSpan(
-                      text: "... 더보기", // 인라인 더보기 버튼
+                      text: "... 더보기",
                       style: const TextStyle(color: Colors.grey, fontSize: 13),
                       recognizer: TapGestureRecognizer()
                         ..onTap = () {

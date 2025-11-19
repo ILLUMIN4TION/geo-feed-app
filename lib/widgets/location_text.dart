@@ -1,5 +1,3 @@
-// lib/widgets/location_text.dart
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
@@ -18,36 +16,55 @@ class _LocationTextState extends State<LocationText> {
   @override
   void initState() {
     super.initState();
+    _loadAddress();
+  }
+
+  // 데이터 로드 로직 분리
+  void _loadAddress() {
     _addressFuture = _getAddressFromGeoPoint(widget.location);
   }
 
-  // (수정) v2 문법 사용
+  // (핵심) 좌표가 바뀌면 주소 다시 변환
+  @override
+  void didUpdateWidget(covariant LocationText oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.location.latitude != widget.location.latitude ||
+        oldWidget.location.longitude != widget.location.longitude) {
+      _loadAddress();
+    }
+  }
+
   Future<String> _getAddressFromGeoPoint(GeoPoint geoPoint) async {
     try {
-      // 1. (신규) 앱 전역 로케일을 먼저 설정
-      await setLocaleIdentifier("ko_KR"); 
+      // v2 방식: 전역 로케일 설정 (한글 주소 강제)
+      await setLocaleIdentifier("ko_KR");
 
-      // 2. (수정) localeIdentifier 파라미터 없이 호출
       List<Placemark> placemarks = await placemarkFromCoordinates(
         geoPoint.latitude,
         geoPoint.longitude,
-        // localeIdentifier: "ko_KR", // <- 이 줄 삭제
       );
 
       if (placemarks.isNotEmpty) {
         final p = placemarks.first;
-        // ... (나머지 주소 조합 로직은 동일)
+
+        // 도로명 주소 우선 표시
         if (p.thoroughfare != null && p.thoroughfare!.isNotEmpty) {
-          return [p.locality, p.subLocality, p.thoroughfare, p.subThoroughfare]
-              .where((s) => s != null && s.isNotEmpty).join(' ');
+          return [
+            p.locality,
+            p.subLocality,
+            p.thoroughfare,
+            p.subThoroughfare
+          ].where((s) => s != null && s.isNotEmpty).join(' ');
         }
+
+        // 없으면 시/구 표시
         return [p.locality, p.subLocality]
             .where((s) => s != null && s.isNotEmpty)
             .join(' ');
       }
       return "알 수 없는 위치";
     } catch (e) {
-      print("Geocoding Error: $e");
+      // print("Geocoding Error: $e");
       return "주소 변환 실패";
     }
   }
@@ -58,14 +75,15 @@ class _LocationTextState extends State<LocationText> {
       future: _addressFuture,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Text("위치 확인 중...", style: TextStyle(fontSize: 12, color: Colors.grey));
+          return const Text("위치 확인 중...",
+              style: TextStyle(fontSize: 12, color: Colors.grey));
         }
 
-        if (snapshot.hasError || !snapshot.hasData || snapshot.data!.isEmpty) {
-          return const Text("위치 정보 없음", style: TextStyle(fontSize: 12, color: Colors.grey));
+        if (snapshot.hasError || !snapshot.hasData) {
+          return const Text("위치 정보 없음",
+              style: TextStyle(fontSize: 12, color: Colors.grey));
         }
 
-        // 4. 성공: 변환된 한글 주소 표시
         return Text(
           snapshot.data!,
           style: const TextStyle(fontSize: 12, color: Colors.grey),

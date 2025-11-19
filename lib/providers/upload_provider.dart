@@ -301,6 +301,14 @@ class UploadProvider extends BaseProvider {
     });
   }
 
+  // (신규) 수동으로 위치 업데이트
+  void updateLocation(GeoPoint newLocation) {
+    if (_preparedData != null) {
+      _preparedData = _preparedData!.copyWith(location: newLocation);
+      notifyListeners(); // UI 갱신
+    }
+  }
+
 
 
 

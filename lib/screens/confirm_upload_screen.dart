@@ -1,8 +1,10 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:geofeed/providers/upload_provider.dart';
-import 'package:geofeed/screens/home_screen.dart'; // HomeScreen (GlobalKey 사용)
+import 'package:geofeed/screens/home_screen.dart'; // GlobalKey 사용을 위해 임포트
+import 'package:geofeed/screens/location_picker_screen.dart'; // 위치 선택 화면 임포트
 import 'package:geofeed/utils/view_state.dart';
-import 'package:geofeed/widgets/loading_overlay.dart'; // 로딩 오버레이
+import 'package:geofeed/widgets/loading_overlay.dart'; // 로딩 오버레이 임포트
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
 
@@ -43,10 +45,10 @@ class ConfirmUploadScreen extends StatelessWidget {
     }
 
     // 4. (정책) 업로드 가능 여부 확인
-    // EXIF 정보나 위치 정보 중 하나라도 있어야 업로드 가능
-    final bool hasExifInfo = exifWidgets.isNotEmpty;
+    // 위치 정보는 필수 (없으면 수동으로라도 찍어야 함)
     final bool hasLocation = preparedData.location != null;
-    final bool canUpload = hasExifInfo || hasLocation;
+    // EXIF는 없어도 위치만 있으면 업로드 허용 (정책에 따라 변경 가능)
+    final bool canUpload = hasLocation;
 
     // 로딩 중일 때도 화면을 유지하기 위해 Stack 사용
     return Stack(
@@ -63,7 +65,7 @@ class ConfirmUploadScreen extends StatelessWidget {
                     bool success = await context.read<UploadProvider>().executeUpload();
 
                     if (success && context.mounted) {
-                      // 성공 시 피드 탭(1번)으로 변경
+                      // 성공 시 피드 탭(1번)으로 변경 (GlobalKey 사용)
                       HomeScreen.homeKey.currentState?.changeTab(1);
 
                       // 홈 화면까지 복귀
@@ -111,35 +113,56 @@ class ConfirmUploadScreen extends StatelessWidget {
                 ),
                 const Divider(),
 
-                // 6. (정책) 업로드 불가 시 경고 메시지 표시
-                if (!canUpload)
+                // 6. (핵심 기능) 위치 정보가 없을 때 '수동 설정 UI' 표시
+                if (!hasLocation)
                   Container(
                     width: double.infinity,
                     margin: const EdgeInsets.all(16.0),
-                    padding: const EdgeInsets.all(12.0),
+                    padding: const EdgeInsets.all(16.0),
                     decoration: BoxDecoration(
-                      color: Colors.red[50],
+                      color: Colors.orange[50],
                       borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: Colors.red),
+                      border: Border.all(color: Colors.orange),
                     ),
-                    child: const Column(
+                    child: Column(
                       children: [
-                        Icon(Icons.error_outline, color: Colors.red),
-                        SizedBox(height: 8),
-                        Text(
-                          "촬영 정보(EXIF)나 위치 정보가 없는 사진은\n업로드할 수 없습니다.",
-                          textAlign: TextAlign.center,
-                          style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+                        const Icon(Icons.add_location_alt, color: Colors.orange, size: 40),
+                        const SizedBox(height: 8),
+                        const Text(
+                          "위치 정보가 없는 사진입니다.",
+                          style: TextStyle(color: Colors.orange, fontWeight: FontWeight.bold),
                         ),
-                        Text(
-                          "다른 사진을 선택해주세요.",
-                          style: TextStyle(color: Colors.red, fontSize: 12),
-                        ),
+                        const Text("지도를 움직여 포토스팟을 지정해주세요."),
+                        const SizedBox(height: 12),
+                        ElevatedButton.icon(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.orange,
+                            foregroundColor: Colors.white,
+                          ),
+                          icon: const Icon(Icons.map),
+                          label: const Text("위치 직접 설정하기"),
+                          onPressed: () async {
+                            // 위치 선택 화면으로 이동
+                            final result = await Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const LocationPickerScreen(),
+                              ),
+                            );
+
+                            // 결과를 받았다면 Provider 업데이트 -> 화면 갱신됨
+                            if (result != null && result is LatLng) {
+                              context.read<UploadProvider>().updateLocation(
+                                GeoPoint(result.latitude, result.longitude),
+                              );
+                            }
+                          },
+                        )
                       ],
                     ),
                   ),
 
-                // EXIF 정보
+                // EXIF 정보 표시
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
                   child: Text("촬영 정보 (EXIF)", style: Theme.of(context).textTheme.titleMedium),
@@ -157,32 +180,29 @@ class ConfirmUploadScreen extends StatelessWidget {
                 ),
                 const Divider(),
 
-                // 위치 정보 (지도)
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                  child: Text("포토스팟 위치", style: Theme.of(context).textTheme.titleMedium),
-                ),
-                (preparedData.location == null)
-                    ? const Padding(
-                  padding: EdgeInsets.all(16.0),
-                  child: Center(child: Text("사진에서 위치 정보를 찾을 수 없습니다.")),
-                )
-                    : Container(
-                  height: 250,
-                  padding: const EdgeInsets.all(12.0),
-                  child: GoogleMap(
-                    initialCameraPosition: CameraPosition(
-                      target: LatLng(
-                        preparedData.location!.latitude,
-                        preparedData.location!.longitude,
-                      ),
-                      zoom: 15,
-                    ),
-                    markers: markers,
-                    scrollGesturesEnabled: false,
-                    zoomGesturesEnabled: false,
+                // 위치 정보 (지도) - 위치가 있을 때만 표시
+                if (hasLocation) ...[
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                    child: Text("포토스팟 위치", style: Theme.of(context).textTheme.titleMedium),
                   ),
-                ),
+                  Container(
+                    height: 250,
+                    padding: const EdgeInsets.all(12.0),
+                    child: GoogleMap(
+                      initialCameraPosition: CameraPosition(
+                        target: LatLng(
+                          preparedData.location!.latitude,
+                          preparedData.location!.longitude,
+                        ),
+                        zoom: 15,
+                      ),
+                      markers: markers,
+                      scrollGesturesEnabled: false,
+                      zoomGesturesEnabled: false,
+                    ),
+                  ),
+                ]
               ],
             ),
           ),
