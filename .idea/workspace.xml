@@ -4,7 +4,24 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="82325aeb-0a99-47e4-96f4-c29a76787eba" name="변경" comment="3주차 교수님 피드백 중 해결 한 부분&#10;&#10;로그아웃 시 피드백 (완료)&#10;&#10;업로드 전 포매팅 및 ISO 타입 변경(완료)&#10;&#10;OAuth 보안 (부분 완료)&#10;gitIgnore 완료&#10;구글클라우드콘솔에서 설정 변경(미완료) &lt;- 집PC를 기준으로 꼭 등록하기" />
+    <list default="true" id="82325aeb-0a99-47e4-96f4-c29a76787eba" name="변경" comment="3주차 교수님 피드백 중 해결 한 부분&#10;&#10;로그아웃 시 피드백 (완료)&#10;&#10;업로드 전 포매팅 및 ISO 타입 변경(완료)&#10;&#10;OAuth 보안 (부분 완료)&#10;gitIgnore 완료&#10;구글클라우드콘솔에서 설정 변경(미완료) &lt;- 집PC를 기준으로 꼭 등록하기">
+      <change afterPath="$PROJECT_DIR$/lib/screens/edit_profile_screen.dart" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/screens/search_screen.dart" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/widgets/expandable_caption.dart" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/widgets/loading_overlay.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/main.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/main.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/models/post.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/models/post.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/providers/my_auth_provider.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/providers/my_auth_provider.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/providers/post_provider.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/providers/post_provider.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/providers/upload_provider.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/providers/upload_provider.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/screens/confirm_upload_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/screens/confirm_upload_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/screens/home_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/screens/home_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/screens/post_detail_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/screens/post_detail_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/screens/profile_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/screens/profile_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/widgets/post_card.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/widgets/post_card.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/widgets/user_info_header.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/widgets/user_info_header.dart" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -34,12 +51,18 @@
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="GithubPullRequestsUISettings"><![CDATA[{
-  "selectedUrlAndAccountId": {
-    "url": "https://github.com/ILLUMIN4TION/geo-feed-app.git",
-    "accountId": "62d71db5-ccd3-469d-b745-b638a8aea6fd"
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;ILLUMIN4TION&quot;
   }
-}]]></component>
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/ILLUMIN4TION/geo-feed-app.git&quot;,
+    &quot;accountId&quot;: &quot;62d71db5-ccd3-469d-b745-b638a8aea6fd&quot;
+  }
+}</component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 8
 }</component>
@@ -56,32 +79,33 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Flutter.main.dart.executor": "Run",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
-    "dart.analysis.tool.window.visible": "false",
-    "git-widget-placeholder": "main",
-    "io.flutter.reload.alreadyRun": "true",
-    "junie.onboarding.icon.badge.shown": "true",
-    "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "C:/Users/user/geofeedDetail/geo-feed-app/android/app",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "project.structure.last.edited": "모듈",
-    "project.structure.proportion": "0.0",
-    "project.structure.side.proportion": "0.0",
-    "show.migrate.to.gradle.popup": "false",
-    "to.speed.mode.migration.done": "true",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Flutter.main.dart.executor&quot;: &quot;Run&quot;,
+    &quot;PROJECT_TRUSTED_KEY&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1&quot;: &quot;true&quot;,
+    &quot;dart.analysis.tool.window.visible&quot;: &quot;false&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;io.flutter.reload.alreadyRun&quot;: &quot;true&quot;,
+    &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/user/geofeedDetail/geo-feed-app/android/app&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;project.structure.last.edited&quot;: &quot;모듈&quot;,
+    &quot;project.structure.proportion&quot;: &quot;0.0&quot;,
+    &quot;project.structure.side.proportion&quot;: &quot;0.0&quot;,
+    &quot;show.migrate.to.gradle.popup&quot;: &quot;false&quot;,
+    &quot;to.speed.mode.migration.done&quot;: &quot;true&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Users\user\geofeedDetail\geo-feed-app\android\app" />
@@ -105,7 +129,11 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1763006297887</updated>
-      <workItem from="1763006299433" duration="11787000" />
+      <workItem from="1763006299433" duration="13248000" />
+      <workItem from="1763357240960" duration="22000" />
+      <workItem from="1763360304995" duration="187000" />
+      <workItem from="1763361337573" duration="193000" />
+      <workItem from="1763514501178" duration="11845000" />
     </task>
     <task id="LOCAL-00001" summary="3주차 교수님 피드백 중 해결 한 부분&#10;&#10;로그아웃 시 피드백 (완료)&#10;&#10;업로드 전 포매팅 및 ISO 타입 변경(완료)&#10;&#10;OAuth 보안 (부분 완료)&#10;gitIgnore 완료&#10;구글클라우드콘솔에서 설정 변경(미완료) &lt;- 집PC를 기준으로 꼭 등록하기">
       <option name="closed" value="true" />

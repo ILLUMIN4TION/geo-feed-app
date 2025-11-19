@@ -71,7 +71,7 @@ class AuthWrapper extends StatelessWidget {
     final firebaseUser = context.watch<User?>();
 
     if (firebaseUser != null) {
-      return const HomeScreen(); // 로그인 시 홈으로
+      return  HomeScreen(); // 로그인 시 홈으로
     } else {
       return const LoginScreen(); // 로그아웃 시 로그인으로
     }

@@ -1,29 +1,35 @@
-// lib/screens/home_screen.dart
-
 import 'package:flutter/material.dart';
 import 'package:geofeed/providers/my_auth_provider.dart';
-import 'package:geofeed/screens/main_feed_screen.dart';
 import 'package:geofeed/screens/upload_screen.dart';
-import 'package:provider/provider.dart';
 import 'package:geofeed/screens/main_map_screen.dart';
-import 'package:geofeed/screens/profile_screen.dart'; // 1. ProfileScreen 임포트
+import 'package:geofeed/screens/main_feed_screen.dart';
+import 'package:geofeed/screens/profile_screen.dart';
+import 'package:geofeed/screens/search_screen.dart';
+import 'package:provider/provider.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  // 외부에서 접근할 수 있는 static 키
+  static final GlobalKey<HomeScreenState> homeKey = GlobalKey<HomeScreenState>();
+
+  // 1. 'const' 키워드 삭제
+  // 2. '{super.key}' 삭제 (외부에서 키를 받지 않고 우리가 만든 homeKey를 강제로 씀)
+  HomeScreen() : super(key: homeKey);
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  State<HomeScreen> createState() => HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
-  int _selectedIndex = 0;
+// 2. 외부에서 접근해야 하므로 클래스 이름 앞의 '_' 제거 (Public 클래스)
+class HomeScreenState extends State<HomeScreen> {
+  int _selectedIndex = 0; // 0: Map, 1: Feed
 
-  final List<Widget> _screens = [
-    const MainMapScreen(),
-    const MainFeedScreen(),
+  final List<Widget> _screens = const [
+    MainMapScreen(),
+    MainFeedScreen(),
   ];
 
-  void _onItemTapped(int index) {
+  // 3. 탭을 변경하는 메서드 (외부 호출용)
+  void changeTab(int index) {
     setState(() {
       _selectedIndex = index;
     });
@@ -35,7 +41,17 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(
         title: Text(_selectedIndex == 0 ? '포토스팟 지도' : 'Geo-Feed'),
         actions: [
-          // 2. (신규) 프로필 아이콘 버튼
+          //검색 버튼
+          IconButton(
+            icon: const Icon(Icons.search),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const SearchScreen()),
+              );
+            },
+          ),
+          // 프로필 버튼
           IconButton(
             icon: const Icon(Icons.account_circle_outlined),
             onPressed: () {
@@ -45,53 +61,51 @@ class _HomeScreenState extends State<HomeScreen> {
               );
             },
           ),
-          
-          // 3. 로그아웃 버튼 (교수님 피드백 적용하기 -> 다이얼로그 띄우기)
+
+          // 로그아웃 버튼 (다이얼로그 포함)
           IconButton(
             icon: const Icon(Icons.logout),
             onPressed: () {
               showDialog(
-                  context: context,
-                  builder: (BuildContext dialogContext) {
-                    return AlertDialog(
-                      title: const Text("로그아웃"),
-                      content: const Text("정말로 로그아웃 하시겠습니까?"),
-                      actions: [
-                        TextButton(
-                          child: const Text("취소"),
-                          onPressed: (){
-                            Navigator.of(dialogContext).pop();
-                          },
-                        ),
-                        TextButton(
-                          child: const Text(
-                            "로그아웃",
-                            style: TextStyle(color: Colors.red)
-                            ),
-                          onPressed: (){
-                            context.read<MyAuthProvider>().signOut();
-                            Navigator.of(dialogContext).pop();
-                          },
-                        ),
-                      ],
-                    );
-                  },
+                context: context,
+                builder: (BuildContext dialogContext) {
+                  return AlertDialog(
+                    title: const Text("로그아웃"),
+                    content: const Text("정말로 로그아웃 하시겠습니까?"),
+                    actions: [
+                      TextButton(
+                        child: const Text("취소"),
+                        onPressed: () => Navigator.of(dialogContext).pop(),
+                      ),
+                      TextButton(
+                        child: const Text("로그아웃", style: TextStyle(color: Colors.red)),
+                        onPressed: () {
+                          context.read<MyAuthProvider>().signOut();
+                          Navigator.of(dialogContext).pop();
+                        },
+                      ),
+                    ],
+                  );
+                },
               );
             },
           ),
         ],
       ),
-      
-      // 1. 선택된 인덱스에 따라 바디(화면)가 변경됨
+
+      // 탭 전환 시 화면 유지
       body: IndexedStack(
         index: _selectedIndex,
         children: _screens,
       ),
 
-      // 2. 하단 네비게이션 바
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
-        onTap: _onItemTapped,
+        onTap: (index) {
+          setState(() {
+            _selectedIndex = index;
+          });
+        },
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.map_outlined),
@@ -105,8 +119,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
-      
-      // 3. 업로드 버튼
+
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           Navigator.push(
@@ -114,10 +127,13 @@ class _HomeScreenState extends State<HomeScreen> {
             MaterialPageRoute(builder: (context) => const UploadScreen()),
           );
         },
+        // (수정) 교수님 피드백: 가독성을 위해 흰색 배경 + 검정 아이콘
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black,
+        elevation: 4.0, // 그림자 추가로 돋보이게
         child: const Icon(Icons.add_a_photo),
-        backgroundColor: Theme.of(context).primaryColor,
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked, // (선택) FAB 위치
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
     );
   }
 }

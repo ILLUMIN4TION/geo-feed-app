@@ -265,7 +265,18 @@ class UploadProvider extends BaseProvider {
     TaskSnapshot snapshot = await task;
     return await snapshot.ref.getDownloadURL();
   }
-  
+
+  // 11. 해시태그 추출 헬퍼 함수
+  List<String> _extractHashtags(String caption) {
+    // 정규식: # 뒤에 공백이 아닌 문자가 1개 이상 오는 것들 찾기
+    RegExp exp = RegExp(r"\#\S+");
+    Iterable<RegExpMatch> matches = exp.allMatches(caption);
+
+    // '#태그' -> '태그' (샵 제거 후 저장하려면 substring(1) 사용, 여기선 # 포함해서 저장)
+    return matches.map((m) => m.group(0)!).toList();
+  }
+
+  // 12. Firestore 저장
   Future<void> _saveToFirestore({
     required String caption,
     required String imageUrl,
@@ -275,13 +286,22 @@ class UploadProvider extends BaseProvider {
     final user = _auth.currentUser;
     if (user == null) return;
 
+    // 2. 캡션에서 태그 추출
+    final List<String> tags = _extractHashtags(caption);
+
     await _firestore.collection('posts').add({
       'userId': user.uid,
       'imageUrl': imageUrl,
       'caption': caption,
       'exifData': exifData,
-      'timestamp': FieldValue.serverTimestamp(),
       'location': location,
+      'timestamp': FieldValue.serverTimestamp(),
+      'likes': [],
+      'tags': tags, // 3. 태그 리스트 저장
     });
   }
+
+
+
+
 }

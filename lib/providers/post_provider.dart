@@ -2,11 +2,13 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:geofeed/models/post.dart'; // W3에서 만든 Post 모델
+import 'package:firebase_auth/firebase_auth.dart'; // Auth 임포트
 import 'package:geofeed/providers/base_provider.dart';
 import 'package:geofeed/utils/view_state.dart';
 
 class PostProvider extends BaseProvider {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseAuth _auth = FirebaseAuth.instance; // Auth 인스턴스
 
   Stream<List<Post>>? _postsStream;
   Stream<List<Post>>? get postsStream => _postsStream;
@@ -33,6 +35,31 @@ class PostProvider extends BaseProvider {
       setState(ViewState.Idle);
     } catch (e) {
       setState(ViewState.Error);
+    }
+  }
+  Future<void> toggleLike(String postId, List<String> currentLikes) async {
+    final user = _auth.currentUser;
+    if (user == null) return; // 로그인 안 했으면 무시
+
+    final String uid = user.uid;
+    final docRef = _firestore.collection('posts').doc(postId);
+
+    try {
+      if (currentLikes.contains(uid)) {
+        // 이미 좋아요를 눌렀다면 -> 배열에서 제거 (좋아요 취소)
+        await docRef.update({
+          'likes': FieldValue.arrayRemove([uid]),
+        });
+      } else {
+        // 안 눌렀다면 -> 배열에 추가 (좋아요)
+        await docRef.update({
+          'likes': FieldValue.arrayUnion([uid]),
+        });
+      }
+      // Firestore가 업데이트되면 Stream이 자동으로 UI를 갱신하므로
+      // 별도의 setState나 notifyListeners가 필요 없음!
+    } catch (e) {
+      print("Like Error: $e");
     }
   }
 }

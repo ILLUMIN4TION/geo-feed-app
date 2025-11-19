@@ -2,6 +2,10 @@ import 'package:geofeed/screens/post_detail_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:geofeed/models/post.dart';
 import 'package:geofeed/widgets/user_info_header.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:geofeed/providers/post_provider.dart';
+import 'package:provider/provider.dart';
+import 'package:geofeed/widgets/expandable_caption.dart';
 
 
 class PostCard extends StatelessWidget {
@@ -10,6 +14,13 @@ class PostCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
+    // 4. 현재 로그인한 유저 ID 가져오기
+    final currentUserId = FirebaseAuth.instance.currentUser?.uid ?? "";
+
+    // 5. 내가 좋아요를 눌렀는지 확인
+    final bool isLiked = post.likes.contains(currentUserId);
+
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 10.0),
       elevation: 1.0,
@@ -64,15 +75,40 @@ class PostCard extends StatelessWidget {
             ),
           ),
 
+          Row(
+            children: [
+              IconButton(
+                icon: Icon(
+                  isLiked ? Icons.favorite : Icons.favorite_border,
+                  color: isLiked ? Colors.red : Colors.black,
+                ),
+                onPressed: () {
+                  // PostProvider의 toggleLike 호출
+                  context.read<PostProvider>().toggleLike(post.id, post.likes);
+                },
+              ),
+              // 좋아요 개수 표시
+              Text(
+                "${post.likes.length}명",
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+
+              const Spacer(), // 오른쪽으로 밀기
+
+              // (선택 사항) 북마크 아이콘 (기능 없음)
+              IconButton(
+                icon: const Icon(Icons.bookmark_border),
+                onPressed: () {},
+              ),
+            ],
+          ),
+
           // 3. 캡션
           Padding(
             padding: const EdgeInsets.all(12.0),
-            child: Text(
-              post.caption.isEmpty ? "(캡션 없음)" : post.caption,
-              style: const TextStyle(fontSize: 15.0),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
+            child: post.caption.isEmpty
+                ? const SizedBox.shrink() // 캡션 없으면 숨김
+                : ExpandableCaption(text: post.caption), // 2. ExpandableCaption 사용
           ),
         ],
       ),

@@ -13,7 +13,13 @@ class PostDetailScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     // 1. EXIF 데이터를 위젯 리스트로 변환
     final List<Widget> exifWidgets = post.exifData.entries
-        .where((entry) => entry.value != null && entry.value.isNotEmpty)
+        .where((entry) {
+      // 값 자체가 null이면 제외
+      if (entry.value == null) return false;
+
+      // (수정 핵심) 값이 숫자(int)일 수 있으므로, 문자열로 변환 후 비어있는지 확인
+      return entry.value.toString().isNotEmpty;
+    })
         .map((entry) => Chip(label: Text("${entry.key}: ${entry.value}")))
         .toList();
 

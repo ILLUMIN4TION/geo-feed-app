@@ -8,6 +8,8 @@ class Post {
   final String caption;     // 캡션(내용)
   final GeoPoint location;    // 위치 (Firestore 지리좌표)
   final Timestamp timestamp; // 작성 시간
+  final List<String> likes; //좋아요 누른 유저 ID 목록
+  final List<String> tags; // 해시태그 목록
 
   // 교수님 피드백 반영 (핵심): EXIF 데이터를 Map으로 저장
   final Map<String, dynamic> exifData; 
@@ -21,6 +23,8 @@ class Post {
     required this.location,
     required this.timestamp,
     required this.exifData,
+    required this.likes,
+    required this.tags,
   });
 
   // Firestore에서 데이터를 읽을 때 사용할 팩토리 생성자
@@ -34,6 +38,8 @@ class Post {
       location: data['location'] ?? const GeoPoint(0, 0),
       timestamp: data['timestamp'] ?? Timestamp.now(),
       exifData: Map<String, dynamic>.from(data['exifData'] ?? {}),
+      likes: List<String>.from(data['likes'] ?? []),
+      tags: List<String>.from(data['tags'] ?? []),
     );
   }
 
@@ -46,6 +52,8 @@ class Post {
       'location': location,
       'timestamp': timestamp,
       'exifData': exifData,
+      'likes': likes,
+      'tags': tags,
     };
   }
 }
