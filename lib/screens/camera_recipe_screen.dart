@@ -12,7 +12,7 @@ class CameraRecipeScreen extends StatefulWidget {
   State<CameraRecipeScreen> createState() => _CameraRecipeScreenState();
 }
 
-class _CameraRecipeScreenState extends State<CameraRecipeScreen> {
+class _CameraRecipeScreenState extends State<CameraRecipeScreen>{
   CameraController? _controller;
   List<CameraDescription>? _cameras;
   bool _isCameraInitialized = false;

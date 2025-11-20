@@ -25,10 +25,17 @@ class UploadScreen extends StatelessWidget {
               if (uploadProvider.state != ViewState.Loading)
                 TextButton(
                   onPressed: () async {
-                    // 'prepare' 메서드 호출 (파싱 + 압축)
+                    // 키보드 숨기기
+                    FocusScope.of(context).unfocus();
+
+                    // 'prepare' 메서드 호출
                     bool success = await context.read<UploadProvider>().prepareUploadData(
                       caption: captionController.text.trim(),
                     );
+
+                    // Provider 내부에서 에러 발생 시 setState(ViewState.Error)를 호출하므로
+                    // success가 false라면 로딩 상태는 이미 해제되었을 것입니다.
+                    // 따라서 별도의 finally 블록이나 추가적인 상태 변경은 필요하지 않습니다.
 
                     if (success && context.mounted) {
                       // 확인 화면으로 이동
@@ -102,7 +109,7 @@ class UploadScreen extends StatelessWidget {
           ),
         ),
 
-        // 로딩 중일 때 오버레이 표시
+        // 로딩 중일 때 오버레이 표시 (Provider 상태에 따라 제어)
         if (uploadProvider.state == ViewState.Loading)
           const LoadingOverlay(),
       ],

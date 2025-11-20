@@ -29,20 +29,28 @@ class UploadProvider extends BaseProvider {
 
   // 이미지 선택 (갤러리 또는 카메라)
   Future<void> pickImageForPreview({required ImageSource source}) async {
-    // 1. 위치 권한 요청 (Android 10+의 Scoped Storage 정책 대응 및 GeoPoint 추출을 위해)
-    var status = await Permission.location.request();
+    try {
+      // 1. 위치 권한 요청 (Android 10+ Scoped Storage 및 GeoPoint 추출용)
+      var status = await Permission.location.request();
 
-    // 2. 권한이 승인되었을 때만 이미지 선택 진행
-    if (status.isGranted) {
-      final XFile? pickedFile = await _picker.pickImage(source: source);
-      if (pickedFile != null) {
-        _pickedImageFile = File(pickedFile.path);
+      // 권한 거부되어도 이미지는 선택할 수 있게 허용할지, 막을지는 정책에 따름
+      // 여기서는 권한이 있어야만 진행하도록 함 (앱 특성상 위치가 중요하므로)
+      if (status.isGranted) {
+        final XFile? pickedFile = await _picker.pickImage(source: source);
+
+        if (pickedFile != null) {
+          _pickedImageFile = File(pickedFile.path);
+          notifyListeners(); // UI 갱신 (미리보기 표시)
+        } else {
+          // 사용자가 선택을 취소한 경우 (아무것도 안 함)
+        }
+      } else {
+        _errorMessage = "위치 권한이 거부되었습니다. 위치 정보를 읽을 수 없습니다.";
         notifyListeners();
       }
-    } else {
-      _errorMessage = "위치 권한이 거부되었습니다. 위치 정보를 읽을 수 없습니다.";
-      // 필요에 따라 에러 상태로 변경하거나 스낵바를 띄울 수 있도록 처리
-      // notifyListeners();
+    } catch (e) {
+      _errorMessage = "이미지 선택 중 오류: $e";
+      notifyListeners();
     }
   }
 
@@ -53,13 +61,13 @@ class UploadProvider extends BaseProvider {
       return false;
     }
 
-    setState(ViewState.Loading);
+    setState(ViewState.Loading); // 로딩 시작
 
     try {
       final bytes = await _pickedImageFile!.readAsBytes();
       final exifRawData = await readExifFromBytes(bytes);
 
-      // 포맷팅된 EXIF 데이터 추출
+      // EXIF 파싱 및 포맷팅
       Map<String, dynamic> exifMetadata = _parseExifMetadata(exifRawData);
       GeoPoint? location = _convertGpsToGeoPoint(exifRawData);
       File compressedFile = await _compressImage(_pickedImageFile!);
@@ -72,17 +80,18 @@ class UploadProvider extends BaseProvider {
         originalFileForPreview: _pickedImageFile!,
       );
 
-      setState(ViewState.Idle);
+      setState(ViewState.Idle); // 성공 시 로딩 종료
       return true;
 
     } catch (e) {
-      _errorMessage = e.toString();
-      setState(ViewState.Error);
+      _errorMessage = "데이터 준비 실패: $e";
+      setState(ViewState.Error); // 에러 시 로딩 종료 및 에러 상태
       return false;
     }
+    // finally 블록 대신 catch에서 setState(Error)를 호출하여 로딩을 확실히 끝냄
   }
 
-  // 수동으로 위치 업데이트
+  // 수동으로 위치 업데이트 (지도 핀 설정 후 호출)
   void updateLocation(GeoPoint newLocation) {
     if (_preparedData != null) {
       _preparedData = _preparedData!.copyWith(location: newLocation);
@@ -118,6 +127,7 @@ class UploadProvider extends BaseProvider {
       setState(ViewState.Error);
       return false;
     } finally {
+      // 업로드 후 데이터 초기화
       _pickedImageFile = null;
       _preparedData = null;
     }
@@ -125,16 +135,13 @@ class UploadProvider extends BaseProvider {
 
   // --- Helper Methods ---
 
-  // EXIF 파싱 및 포맷팅
   Map<String, dynamic> _parseExifMetadata(Map<String, IfdTag> data) {
     if (data.isEmpty) return {};
 
-    // 원본 값 추출
     String apertureRaw = data['EXIF FNumber']?.toString() ?? 'N/A';
     String shutterRaw = data['EXIF ExposureTime']?.toString() ?? 'N/A';
     String isoRaw = data['EXIF ISOSpeedRatings']?.toString() ?? 'N/A';
 
-    // 포맷팅
     int? isoNumber = int.tryParse(isoRaw);
     String shutterFormatted = _formatShutterSpeed(shutterRaw);
     String apertureFormatted = _formatAperture(apertureRaw);
@@ -144,12 +151,11 @@ class UploadProvider extends BaseProvider {
       'Model': data['Image Model']?.toString(),
       'Aperture': (apertureFormatted == 'N/A') ? null : apertureFormatted,
       'ShutterSpeed': (shutterFormatted == 'N/A') ? null : shutterFormatted,
-      'ISO': isoNumber, // 정수형 저장
+      'ISO': isoNumber,
       'FocalLength': _formatFocalLength(data['EXIF FocalLength']?.toString() ?? 'N/A'),
     };
   }
 
-  // GPS -> GeoPoint 변환
   GeoPoint? _convertGpsToGeoPoint(Map<String, IfdTag> data) {
     final latTag = data['GPS GPSLatitude'];
     final lonTag = data['GPS GPSLongitude'];
@@ -177,7 +183,6 @@ class UploadProvider extends BaseProvider {
     }
   }
 
-  // 이미지 압축
   Future<File> _compressImage(File file) async {
     final dir = await getTemporaryDirectory();
     final targetPath = p.join(dir.absolute.path, "${DateTime.now().millisecondsSinceEpoch}.jpg");
@@ -194,7 +199,6 @@ class UploadProvider extends BaseProvider {
     return File(result.path);
   }
 
-  // Storage 업로드
   Future<String?> _uploadToStorage(File file) async {
     final user = _auth.currentUser;
     if (user == null) return null;
@@ -205,14 +209,12 @@ class UploadProvider extends BaseProvider {
     return await snapshot.ref.getDownloadURL();
   }
 
-  // 해시태그 추출
   List<String> _extractHashtags(String caption) {
     RegExp exp = RegExp(r"\#\S+");
     Iterable<RegExpMatch> matches = exp.allMatches(caption);
     return matches.map((m) => m.group(0)!).toList();
   }
 
-  // Firestore 저장
   Future<void> _saveToFirestore({
     required String caption,
     required String imageUrl,
@@ -235,8 +237,6 @@ class UploadProvider extends BaseProvider {
       'tags': tags,
     });
   }
-
-  // --- 포맷팅 헬퍼 함수들 ---
 
   String _formatFocalLength(String text) {
     if (text == 'N/A' || text.isEmpty) return 'N/A';

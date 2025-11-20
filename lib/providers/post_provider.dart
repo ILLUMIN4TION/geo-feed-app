@@ -7,12 +7,14 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:geofeed/providers/base_provider.dart';
 import 'package:geofeed/utils/view_state.dart';
 
-class PostProvider extends BaseProvider {
+class PostProvider extends BaseProvider { //baseProvider 상속 idle/loading/error 가짐
+  //피드에 내용을 표시하기 위한 파이어베이스 인스턴스들 초기화
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final FirebaseAuth _auth = FirebaseAuth.instance; // Auth 인스턴스
-  final FirebaseStorage _storage = FirebaseStorage.instance; // 2. Storage 인스턴스
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseStorage _storage = FirebaseStorage.instance;
 
-  Stream<List<Post>>? _postsStream;
+
+  Stream<List<Post>>? _postsStream; //TODO , Stream == 클릭리스너와 동일한 상태 , 취소 처리 위치확인 교수님 피드백
   Stream<List<Post>>? get postsStream => _postsStream;
 
   PostProvider() {
@@ -31,9 +33,10 @@ class PostProvider extends BaseProvider {
           .map((snapshot) {
             // QuerySnapshot을 List<Post>로 변환
             return snapshot.docs.map((doc) {
-              return Post.fromFirestore(doc); // W3에서 만든 팩토리 생성자
+              return Post.fromFirestore(doc);
             }).toList();
-          });
+          }); // 파이어스토어의 posts 컬렉션에서 가져온 값을 최종 Stream<List<Post>>으로 변환하여 _postStream의 데이터 원천으로 지정
+
       setState(ViewState.Idle);
     } catch (e) {
       setState(ViewState.Error);
@@ -43,10 +46,10 @@ class PostProvider extends BaseProvider {
   //2. 좋아요 토글
   Future<void> toggleLike(String postId, List<String> currentLikes) async {
     final user = _auth.currentUser;
-    if (user == null) return; // 로그인 안 했으면 무시
+    if (user == null) return; //TODO  로그인 안 했으면 무시 <- 현재 우리 앱의 피드화면까지 오려면 무조건 로그인이 필요한데 이 코드가 필요할까?
 
-    final String uid = user.uid;
-    final docRef = _firestore.collection('posts').doc(postId);
+    final String uid = user.uid;                                //유저가 좋아요 했는지 안했는지 여부를 판단하기 위함
+    final docRef = _firestore.collection('posts').doc(postId); // 각 포스트카드에서 그 게시글의 실제 파이어베이스의 postID를 가지고옴
 
     try {
       if (currentLikes.contains(uid)) {

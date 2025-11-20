@@ -178,7 +178,7 @@ class ConfirmUploadScreen extends StatelessWidget {
                   )
                       : Wrap(spacing: 8.0, runSpacing: 4.0, children: exifWidgets),
                 ),
-                const Divider(),
+                const Divider (),
 
                 // 위치 정보 (지도) - 위치가 있을 때만 표시
                 if (hasLocation) ...[

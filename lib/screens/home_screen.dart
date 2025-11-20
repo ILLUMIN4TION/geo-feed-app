@@ -94,14 +94,14 @@ class HomeScreenState extends State<HomeScreen> {
       ),
 
       // 탭 전환 시 화면 유지
-      body: IndexedStack(
+      body: IndexedStack( //현재 IndexedStack으로 selectedIndex에 들어간 값에 따라 보여줄 화면 분기 [MainMapScreen/MainFeedScreen]
         index: _selectedIndex,
         children: _screens,
       ),
 
-      bottomNavigationBar: BottomNavigationBar(
+      bottomNavigationBar: BottomNavigationBar(// 바텀네비바로 현재 인덱스 표시(기본값 1)
         currentIndex: _selectedIndex,
-        onTap: (index) {
+        onTap: (index) {                      //바텀네비의 각 인덱스 클릭시 , 선택된 인덱스의 값 변경, setState로 화면 다시 그리기
           setState(() {
             _selectedIndex = index;
           });
