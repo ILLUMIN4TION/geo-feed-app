@@ -2,6 +2,7 @@
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:geofeed/screens/search_screen.dart';
 
 class ExpandableCaption extends StatefulWidget {
   final String text;
@@ -126,12 +127,33 @@ class _ExpandableCaptionState extends State<ExpandableCaption> {
             },
           ),
 
-        // 4. 하단 해시태그
-        if (tags.isNotEmpty)
-          Padding(
-            padding: const EdgeInsets.only(top: 8.0),
-            child: _buildTags(tags),
+        if (tags.isNotEmpty) ...[
+          const SizedBox(height: 8), // 본문과 간격
+          Wrap(
+            spacing: 4.0,
+            children: tags.map((tag) {
+              return GestureDetector( // 2. (신규) GestureDetector로 감싸기
+                onTap: () {
+                  // 3. (핵심) 태그 클릭 시 SearchScreen으로 이동
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      // 태그 문자열(예: #여행)을 SearchScreen에 검색어로 전달
+                      builder: (context) => SearchScreen(initialSearchTerm: tag),
+                    ),
+                  );
+                },
+                child: Text(
+                  "$tag ", // 태그 뒤에 띄어쓰기 하나 추가
+                  style: const TextStyle(
+                    color: Colors.blue,
+                    fontSize: 15,
+                  ),
+                ),
+              );
+            }).toList(),
           ),
+        ],
       ],
     );
   }

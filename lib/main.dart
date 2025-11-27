@@ -5,7 +5,7 @@ import 'package:geofeed/providers/my_auth_provider.dart';
 import 'package:geofeed/providers/post_provider.dart';
 import 'package:geofeed/providers/upload_provider.dart';
 import 'package:geofeed/screens/home_screen.dart';
-import 'package:geofeed/screens/login_screen.dart';
+import 'package:geofeed/screens/auth/login_screen.dart';
 import 'package:provider/provider.dart';
 import 'firebase_options.dart';
 

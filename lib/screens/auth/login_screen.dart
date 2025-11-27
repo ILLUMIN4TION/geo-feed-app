@@ -1,7 +1,9 @@
+// lib/screens/login_screen.dart
+
 import 'package:flutter/material.dart';
-import 'package:geofeed/providers/my_auth_provider.dart';
+import 'package:geofeed/providers/my_auth_provider.dart'; // 이름 변경 반영
 import 'package:geofeed/utils/view_state.dart';
-import 'package:geofeed/screens/register_screen.dart';
+import 'package:geofeed/screens/auth/register_screen.dart'; // (다음 단계에서 생성)
 import 'package:provider/provider.dart';
 
 class LoginScreen extends StatelessWidget {
@@ -52,24 +54,22 @@ class LoginScreen extends StatelessWidget {
                   obscureText: true,
                 ),
                 const SizedBox(height: 30),
-
-
-                // 1. 로딩 상태에 따라 로그인 버튼 또는 프로그레스바 인디케이터 표시
+                
+                // 1. 로딩 상태에 따라 버튼 또는 인디케이터 표시
                 (authProvider.state == ViewState.Loading)
-                    ? const CircularProgressIndicator() // Loading이면 -> 프로그레스바를 보여주고,
-                    : SizedBox(                         // 아니면 로그인 버튼을 보여줘
+                    ? const CircularProgressIndicator()
+                    : SizedBox(
                         width: double.infinity,
-
-                        child: ElevatedButton(          // 로그인 버튼
+                        child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
                             padding: const EdgeInsets.symmetric(vertical: 16),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(8),
                             ),
                           ),
-                          onPressed: () async {         //파이어베이스 auth와 통신, MyAuthProvider에 있는 로그인 메서드의 결과를 success에 저장
+                          onPressed: () async {
                             bool success = await context.read<MyAuthProvider>().signIn(
-                                  email: emailController.text.trim(), //텍스트 인풋에서 공백 제거
+                                  email: emailController.text.trim(),
                                   password: passwordController.text.trim(),
                                 );
                             

@@ -12,12 +12,14 @@ class UserInfoHeader extends StatefulWidget {
   // (신규) 상세 화면에서 직접 수정/삭제 후 처리를 위한 콜백
   final VoidCallback? onEdit;
   final VoidCallback? onDeleteFinished;
+  final bool shouldPopOnDelete;// 기본 false
 
   const UserInfoHeader({
     super.key,
     required this.post,
     this.onEdit,
     this.onDeleteFinished,
+    this.shouldPopOnDelete = false,   // ← 기본 false
   });
 
   @override
@@ -181,7 +183,12 @@ class _UserInfoHeaderState extends State<UserInfoHeader> {
                   const SnackBar(content: Text("게시물이 삭제되었습니다.")),
                 );
 
-                // (신규) 삭제 완료 후 추가 작업(화면 닫기 등) 실행
+                // (1) 삭제 후 바텀시트가 닫히게 하고 싶을 때만 수행
+                if (widget.shouldPopOnDelete) {
+                  Navigator.pop(context);  // ← 바텀시트 닫기
+                }
+
+                // (2) 추가 작업 (상세화면에서 사용됨)
                 if (widget.onDeleteFinished != null) {
                   widget.onDeleteFinished!();
                 }

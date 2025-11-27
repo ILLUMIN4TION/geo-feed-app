@@ -112,9 +112,9 @@ class ProfileScreen extends StatelessWidget {
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                                   children: [
-                                    _buildStatColumn(context, "게시물", posts.length), // 클릭 안됨
+                                    _buildStatColumn(context, "게시물", posts.length),
 
-                                    // 팔로워 클릭 -> 리스트 이동
+                                    // 1. (수정) 팔로워 (followers.length)
                                     _buildStatColumn(context, "팔로워", followers.length, onTap: () {
                                       Navigator.push(
                                         context,
@@ -127,7 +127,7 @@ class ProfileScreen extends StatelessWidget {
                                       );
                                     }),
 
-                                    // 팔로잉 클릭 -> 리스트 이동
+                                    // 2. (수정) 팔로잉 (following.length)
                                     _buildStatColumn(context, "팔로잉", following.length, onTap: () {
                                       Navigator.push(
                                         context,

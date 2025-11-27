@@ -1,10 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:geofeed/providers/upload_provider.dart';
-import 'package:geofeed/screens/home_screen.dart'; // GlobalKey 사용을 위해 임포트
-import 'package:geofeed/screens/location_picker_screen.dart'; // 위치 선택 화면 임포트
+import 'package:geofeed/providers/post_provider.dart'; // PostProvider 추가
+import 'package:geofeed/screens/home_screen.dart';
+import 'package:geofeed/screens/location_picker_screen.dart';
 import 'package:geofeed/utils/view_state.dart';
-import 'package:geofeed/widgets/loading_overlay.dart'; // 로딩 오버레이 임포트
+import 'package:geofeed/widgets/loading_overlay.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
 
@@ -16,7 +17,7 @@ class ConfirmUploadScreen extends StatelessWidget {
     final uploadProvider = context.watch<UploadProvider>();
     final preparedData = uploadProvider.preparedData;
 
-    // 1. 데이터 유효성 검사 (비정상 접근 방지)
+    // 1. 데이터 유효성 검사
     if (preparedData == null) {
       return Scaffold(
         appBar: AppBar(),
@@ -24,13 +25,13 @@ class ConfirmUploadScreen extends StatelessWidget {
       );
     }
 
-    // 2. EXIF 위젯 리스트 생성
+    // 2. EXIF 위젯 리스트
     final List<Widget> exifWidgets = preparedData.exifData.entries
         .where((entry) => entry.value != null && entry.value.toString() != 'N/A')
         .map((entry) => Chip(label: Text("${entry.key}: ${entry.value}")))
         .toList();
 
-    // 3. 지도 마커 생성
+    // 3. 지도 마커
     final Set<Marker> markers = {};
     if (preparedData.location != null) {
       markers.add(
@@ -44,20 +45,17 @@ class ConfirmUploadScreen extends StatelessWidget {
       );
     }
 
-    // 4. (정책) 업로드 가능 여부 확인
-    // 위치 정보는 필수 (없으면 수동으로라도 찍어야 함)
+    // 4. 업로드 가능 여부 확인
     final bool hasLocation = preparedData.location != null;
-    // EXIF는 없어도 위치만 있으면 업로드 허용 (정책에 따라 변경 가능)
     final bool canUpload = hasLocation;
 
-    // 로딩 중일 때도 화면을 유지하기 위해 Stack 사용
     return Stack(
       children: [
         Scaffold(
           appBar: AppBar(
             title: const Text("공유 전 확인"),
             actions: [
-              // 5. (정책) 로딩 중이 아니고 && 업로드 조건 만족 시 버튼 표시
+              // 5. 공유 버튼
               if (uploadProvider.state != ViewState.Loading && canUpload)
                 TextButton(
                   onPressed: () async {
@@ -65,7 +63,10 @@ class ConfirmUploadScreen extends StatelessWidget {
                     bool success = await context.read<UploadProvider>().executeUpload();
 
                     if (success && context.mounted) {
-                      // 성공 시 피드 탭(1번)으로 변경 (GlobalKey 사용)
+                      // [핵심] 업로드 성공 시 피드 목록 강제 새로고침
+                      await context.read<PostProvider>().fetchPosts(refresh: true);
+
+                      // 피드 탭으로 이동
                       HomeScreen.homeKey.currentState?.changeTab(1);
 
                       // 홈 화면까지 복귀
@@ -75,7 +76,6 @@ class ConfirmUploadScreen extends StatelessWidget {
                         const SnackBar(content: Text("업로드 완료!"), backgroundColor: Colors.green),
                       );
                     } else if (!success && context.mounted) {
-                      // 실패 시 에러 표시
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
                           content: Text(context.read<UploadProvider>().errorMessage ?? "업로드 실패"),
@@ -102,7 +102,6 @@ class ConfirmUploadScreen extends StatelessWidget {
                   width: double.infinity,
                   fit: BoxFit.cover,
                 ),
-
                 // 캡션
                 Padding(
                   padding: const EdgeInsets.all(12.0),
@@ -112,8 +111,7 @@ class ConfirmUploadScreen extends StatelessWidget {
                   ),
                 ),
                 const Divider(),
-
-                // 6. (핵심 기능) 위치 정보가 없을 때 '수동 설정 UI' 표시
+                // 위치 수동 설정 UI (위치 없을 때만)
                 if (!hasLocation)
                   Container(
                     width: double.infinity,
@@ -142,15 +140,12 @@ class ConfirmUploadScreen extends StatelessWidget {
                           icon: const Icon(Icons.map),
                           label: const Text("위치 직접 설정하기"),
                           onPressed: () async {
-                            // 위치 선택 화면으로 이동
                             final result = await Navigator.push(
                               context,
                               MaterialPageRoute(
                                 builder: (context) => const LocationPickerScreen(),
                               ),
                             );
-
-                            // 결과를 받았다면 Provider 업데이트 -> 화면 갱신됨
                             if (result != null && result is LatLng) {
                               context.read<UploadProvider>().updateLocation(
                                 GeoPoint(result.latitude, result.longitude),
@@ -161,8 +156,7 @@ class ConfirmUploadScreen extends StatelessWidget {
                       ],
                     ),
                   ),
-
-                // EXIF 정보 표시
+                // EXIF 정보
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
                   child: Text("촬영 정보 (EXIF)", style: Theme.of(context).textTheme.titleMedium),
@@ -179,8 +173,7 @@ class ConfirmUploadScreen extends StatelessWidget {
                       : Wrap(spacing: 8.0, runSpacing: 4.0, children: exifWidgets),
                 ),
                 const Divider (),
-
-                // 위치 정보 (지도) - 위치가 있을 때만 표시
+                // 지도
                 if (hasLocation) ...[
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 12.0),
@@ -207,10 +200,7 @@ class ConfirmUploadScreen extends StatelessWidget {
             ),
           ),
         ),
-
-        // 7. 로딩 오버레이 (맨 위에 표시)
-        if (uploadProvider.state == ViewState.Loading)
-          const LoadingOverlay(),
+        if (uploadProvider.state == ViewState.Loading) const LoadingOverlay(),
       ],
     );
   }

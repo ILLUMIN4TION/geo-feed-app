@@ -15,6 +15,7 @@ class HomeScreen extends StatefulWidget {
   // 2. '{super.key}' 삭제 (외부에서 키를 받지 않고 우리가 만든 homeKey를 강제로 씀)
   HomeScreen() : super(key: homeKey);
 
+
   @override
   State<HomeScreen> createState() => HomeScreenState();
 }
