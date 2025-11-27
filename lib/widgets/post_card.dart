@@ -38,6 +38,7 @@ class PostCard extends StatelessWidget {
                 MaterialPageRoute(builder: (context) => PostDetailScreen(post: post)),
               );
             },
+            //화면에 EXIF 정보를 표시하기 위한 영역 Stack으로 씌움
             child: Stack(
               children: [
                 CachedNetworkImage(
@@ -84,7 +85,7 @@ class PostCard extends StatelessWidget {
               // 좋아요 수 표시 (즉시 반영됨)
               Text("${post.likes.length}명", style: const TextStyle(fontWeight: FontWeight.bold)),
               const Spacer(),
-              IconButton(icon: const Icon(Icons.bookmark_border), onPressed: () {}),
+              //TODO 북마크 버튼 잠깐 비활성화 추후에 사용할 수도 있음 IconButton(icon: const Icon(Icons.bookmark_border), onPressed: () {}),
             ],
           ),
 
