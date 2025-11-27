@@ -100,9 +100,6 @@ class _MainMapScreenState extends State<MainMapScreen> {
     _markers = _createMarkers(context, postProvider.posts);
 
     return Scaffold(
-      // appBar: AppBar(
-      //   title: const Text("포토스팟 지도"),
-      // ),
       body: GoogleMap(
         initialCameraPosition: _initialCameraPosition,
         onMapCreated: _onMapCreated,
