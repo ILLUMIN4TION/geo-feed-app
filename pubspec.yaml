@@ -28,9 +28,12 @@ dependencies:
   flutter_image_compress: ^2.3.0
 
   # 4. Map & Clustering
-  google_maps_flutter: ^2.6.1
-#  google_maps_cluster_manager: ^3.0.0+1
-  # 5. 카메라 관련 기능 (촬영 및 갤러리 저장)
+  google_maps_flutter: 2.6.0
+  google_maps_cluster_manager_2: ^3.2.0
+
+
+
+
   camera: ^0.10.5+9
   permission_handler: ^11.3.1
   geocoding: ^3.0.0

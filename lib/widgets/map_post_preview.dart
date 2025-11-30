@@ -1,3 +1,4 @@
+// lib/widgets/map_post_preview.dart
 import 'package:flutter/material.dart';
 import 'package:geofeed/models/post.dart';
 import 'package:geofeed/widgets/user_info_header.dart';
@@ -16,7 +17,7 @@ class MapPostPreview extends StatelessWidget {
         children: [
           UserInfoHeader(
             post: post,
-            shouldPopOnDelete: true,   // ← 바텀시트 닫기 활성화
+            shouldPopOnDelete: true,
           ),
           const SizedBox(height: 10),
 
@@ -34,7 +35,6 @@ class MapPostPreview extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 12),
-
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -68,7 +68,8 @@ class MapPostPreview extends StatelessWidget {
             width: double.infinity,
             child: ElevatedButton(
               onPressed: () {
-                Navigator.pop(context, post); // ✔ 반드시 유지
+                // 여기서 Post를 반환하면 호출자(=MainMapScreen)가 받아서 상세로 push함
+                Navigator.pop(context, post);
               },
               child: const Text("상세 정보 보기"),
             ),
