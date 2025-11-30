@@ -68,47 +68,66 @@ class _MainMapScreenState extends State<MainMapScreen> {
     _clusterManager?.updateMap();
   }
 
+  // 클러스터 플로우를 처리하는 별도 함수
+  Future<void> _handleClusterFlow(List<PostClusterItem> clusterItems) async {
+    Post? selectedPost;
+
+    // 1단계: 갤러리 시트 표시
+    selectedPost = await showModalBottomSheet<Post?>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => MapClusterGallerySheet(items: clusterItems),
+    );
+
+    if (!mounted || selectedPost == null) return;
+
+    // 2단계: 프리뷰 시트 표시
+    await _handlePreviewFlow(selectedPost, clusterItems);
+  }
+
+  // 단일 포스트 또는 프리뷰 플로우를 처리하는 함수
+  Future<void> _handlePreviewFlow(Post post, [List<PostClusterItem>? clusterItems]) async {
+    final previewResult = await showModalBottomSheet<Post?>(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (_) => MapPostPreview(post: post),
+    );
+
+    if (!mounted || previewResult == null) return;
+
+    // 3단계: 상세 페이지로 이동
+    final detailResult = await Navigator.push<dynamic>(
+      context,
+      MaterialPageRoute(
+        builder: (_) => PostDetailScreen(post: previewResult),
+      ),
+    );
+
+    if (!mounted) return;
+
+    // 상세 페이지에서 돌아올 때 처리
+    if (detailResult != null && detailResult is Map) {
+      if (detailResult['reopenPreview'] == true) {
+        // 프리뷰 시트 다시 열기
+        await _handlePreviewFlow(previewResult, clusterItems);
+      }
+    } else if (detailResult != null && detailResult is Post) {
+      // 업데이트된 포스트로 프리뷰 다시 열기
+      await _handlePreviewFlow(detailResult, clusterItems);
+    }
+  }
+
   Future<Marker> _markerBuilder(Cluster<PostClusterItem> cluster) async {
     if (cluster.isMultiple) {
       return Marker(
         markerId: MarkerId("cluster_${cluster.getId()}"),
         position: cluster.location,
         icon: await _getClusterBitmap(125, text: cluster.count.toString()),
-        onTap: () async {
-          // --- 1: 군집 클릭 -> 갤러리 시트 호출 (반환: 선택된 Post)
-          final selectedPost = await showModalBottomSheet<Post?>(
-            context: context,
-            isScrollControlled: true,
-            backgroundColor: Colors.transparent,
-            builder: (_) => MapClusterGallerySheet(items: cluster.items.toList()),
-          );
-
-          if (!context.mounted) return;
-
-          // --- 2: 갤러리에서 선택된 포스트가 있으면 -> 프리뷰 시트 호출 (반환: previewResult)
-          if (selectedPost != null) {
-            final previewResult = await showModalBottomSheet<Post?>(
-              context: context,
-              isScrollControlled: true,
-              shape: const RoundedRectangleBorder(
-                borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-              ),
-              builder: (_) => MapPostPreview(post: selectedPost),
-            );
-
-            if (!context.mounted) return;
-
-            // --- 3: 프리뷰에서 post 반환되면 상세 페이지로 이동
-            if (previewResult != null) {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => PostDetailScreen(post: previewResult),
-                ),
-              );
-            }
-          }
-        },
+        onTap: () => _handleClusterFlow(cluster.items.toList()),
       );
     }
 
@@ -119,27 +138,7 @@ class _MainMapScreenState extends State<MainMapScreen> {
       markerId: MarkerId(post.id),
       position: cluster.location,
       icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
-      onTap: () async {
-        final selectedPost = await showModalBottomSheet<Post?>(
-          context: context,
-          isScrollControlled: true,
-          shape: const RoundedRectangleBorder(
-            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-          ),
-          builder: (_) => MapPostPreview(post: post),
-        );
-
-        if (!context.mounted) return;
-
-        if (selectedPost != null) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => PostDetailScreen(post: selectedPost),
-            ),
-          );
-        }
-      },
+      onTap: () => _handlePreviewFlow(post),
     );
   }
 

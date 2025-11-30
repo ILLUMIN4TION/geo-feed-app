@@ -57,7 +57,8 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
       canPop: false,
       onPopInvoked: (didPop) {
         if (!didPop) {
-          Navigator.pop(context, {"reopenSheet": true});
+          // 뒤로가기 시 프리뷰 시트를 다시 열도록 신호 전달
+          Navigator.pop(context, {"reopenPreview": true});
         }
       },
       child: Scaffold(
@@ -72,13 +73,14 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                   widget.post.id,
                   _captionController.text.trim(),
                 );
-      
+
                 setState(() {
                   _isEditing = false;
                 });
-      
+
                 if (mounted) {
-                  Navigator.pop(context, updatedPost); //  반드시 유지
+                  // 업데이트된 포스트를 반환하여 프리뷰 재오픈
+                  Navigator.pop(context, updatedPost);
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text("수정 완료!")),
                   );
@@ -92,7 +94,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
           ]
               : null,
         ),
-      
+
         body: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -108,7 +110,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                   Navigator.of(context).pop(null);
                 },
               ),
-      
+
               CachedNetworkImage(
                 imageUrl: widget.post.imageUrl,
                 fit: BoxFit.cover,
@@ -117,7 +119,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                 const Center(child: CircularProgressIndicator()),
                 errorWidget: (c, _, __) => const Icon(Icons.error),
               ),
-      
+
               Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: _isEditing
@@ -138,7 +140,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                   style: const TextStyle(fontSize: 16),
                 ),
               ),
-      
+
               if (_isEditing)
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -156,16 +158,16 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                     ),
                   ),
                 ),
-      
+
               const Divider(),
-      
+
               Padding(
                 padding:
                 const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
                 child: Text("촬영 정보 (EXIF)",
                     style: Theme.of(context).textTheme.titleMedium),
               ),
-      
+
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
                 child: exifWidgets.isEmpty
@@ -184,16 +186,16 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                   children: exifWidgets,
                 ),
               ),
-      
+
               const Divider(),
-      
+
               Padding(
                 padding:
                 const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
                 child: Text("포토스팟 위치",
                     style: Theme.of(context).textTheme.titleMedium),
               ),
-      
+
               widget.post.location == null
                   ? const Padding(
                 padding: EdgeInsets.all(16.0),
@@ -213,9 +215,9 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                   markers: markers,
                 ),
               ),
-      
+
               const SizedBox(height: 20),
-      
+
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
                 child: SizedBox(
@@ -246,7 +248,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                   ),
                 ),
               ),
-      
+
               const SizedBox(height: 50),
             ],
           ),
