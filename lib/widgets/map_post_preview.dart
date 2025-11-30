@@ -15,9 +15,23 @@ class MapPostPreview extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          UserInfoHeader(
-            post: post,
-            shouldPopOnDelete: true,
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: UserInfoHeader(
+                  post: post,
+                  shouldPopOnDelete: true,
+                ),
+              ),
+              IconButton(
+                icon: const Icon(Icons.close),
+                onPressed: () {
+                  // 닫기 버튼: 갤러리로 돌아가는 신호
+                  Navigator.pop(context, "backToGallery");
+                },
+              ),
+            ],
           ),
           const SizedBox(height: 10),
 

@@ -27,6 +27,7 @@ class _MainMapScreenState extends State<MainMapScreen> {
   ClusterManager<PostClusterItem>? _clusterManager;
 
   Set<Marker> _markers = {};
+  bool _isMapReady = false;
 
   static const CameraPosition _initialCameraPosition = CameraPosition(
     target: LatLng(37.5665, 126.9780),
@@ -34,15 +35,25 @@ class _MainMapScreenState extends State<MainMapScreen> {
   );
 
   @override
+  void initState() {
+    super.initState();
+    // initState에서는 context를 사용할 수 없으므로 여기서는 초기화하지 않음
+  }
+
+  @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    // ClusterManager를 매번 초기화하지 않고, 데이터가 있을 때만 초기화
     if (_clusterManager == null) {
-      _initClusterManager();
+      final posts = context.read<PostProvider>().mapPosts;
+      if (posts.isNotEmpty) {
+        _initClusterManager();
+      }
     }
   }
 
   void _initClusterManager() {
-    final posts = context.read<PostProvider>().posts;
+    final posts = context.read<PostProvider>().mapPosts;
 
     final items = posts
         .where((e) => e.location != null)
@@ -56,39 +67,66 @@ class _MainMapScreenState extends State<MainMapScreen> {
       stopClusteringZoom: 17,
       levels: const [1, 4.25, 6.75, 8.25, 11.5, 14.5, 16.0, 16.5, 20.0],
     );
+
+    // 지도가 이미 준비됐다면 바로 업데이트
+    if (_isMapReady && _mapController != null) {
+      _clusterManager?.setMapId(_mapController!.mapId);
+      _clusterManager?.updateMap();
+    }
   }
 
   void _updateMarkers(Set<Marker> markers) {
-    setState(() => _markers = markers);
+    if (mounted) {
+      setState(() => _markers = markers);
+    }
   }
 
   void _onMapCreated(GoogleMapController controller) {
     _mapController = controller;
-    _clusterManager?.setMapId(controller.mapId);
-    _clusterManager?.updateMap();
+    _isMapReady = true;
+
+    if (_clusterManager != null) {
+      _clusterManager?.setMapId(controller.mapId);
+      _clusterManager?.updateMap();
+    } else {
+      // ClusterManager가 아직 없으면 지금 초기화
+      _initClusterManager();
+      _clusterManager?.setMapId(controller.mapId);
+      _clusterManager?.updateMap();
+    }
   }
 
   // 클러스터 플로우를 처리하는 별도 함수
   Future<void> _handleClusterFlow(List<PostClusterItem> clusterItems) async {
-    Post? selectedPost;
+    bool shouldReopenGallery = true;
 
-    // 1단계: 갤러리 시트 표시
-    selectedPost = await showModalBottomSheet<Post?>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (_) => MapClusterGallerySheet(items: clusterItems),
-    );
+    while (shouldReopenGallery && mounted) {
+      shouldReopenGallery = false;
 
-    if (!mounted || selectedPost == null) return;
+      // 1단계: 갤러리 시트 표시
+      final selectedPost = await showModalBottomSheet<Post?>(
+        context: context,
+        isScrollControlled: true,
+        backgroundColor: Colors.transparent,
+        builder: (_) => MapClusterGallerySheet(items: clusterItems),
+      );
 
-    // 2단계: 프리뷰 시트 표시
-    await _handlePreviewFlow(selectedPost, clusterItems);
+      if (!mounted || selectedPost == null) break;
+
+      // 2단계: 프리뷰 시트 표시 및 상세 화면 플로우
+      final shouldReopen = await _handlePreviewFlow(selectedPost, clusterItems);
+
+      // 프리뷰에서 갤러리로 돌아가라는 신호를 받으면 갤러리 다시 열기
+      if (shouldReopen) {
+        shouldReopenGallery = true;
+      }
+    }
   }
 
   // 단일 포스트 또는 프리뷰 플로우를 처리하는 함수
-  Future<void> _handlePreviewFlow(Post post, [List<PostClusterItem>? clusterItems]) async {
-    final previewResult = await showModalBottomSheet<Post?>(
+  // 반환값: true면 갤러리로 돌아가야 함
+  Future<bool> _handlePreviewFlow(Post post, [List<PostClusterItem>? clusterItems]) async {
+    final previewResult = await showModalBottomSheet<dynamic>(
       context: context,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
@@ -97,7 +135,21 @@ class _MainMapScreenState extends State<MainMapScreen> {
       builder: (_) => MapPostPreview(post: post),
     );
 
-    if (!mounted || previewResult == null) return;
+    if (!mounted) return false;
+
+    // 프리뷰에서 닫기 버튼이나 외부 탭으로 닫은 경우
+    if (previewResult == null) {
+      // 클러스터에서 온 경우 갤러리로 돌아가기
+      return clusterItems != null;
+    }
+
+    // "backToGallery" 신호를 받은 경우
+    if (previewResult is String && previewResult == "backToGallery") {
+      return clusterItems != null;
+    }
+
+    // Post를 반환받은 경우 (상세 보기 버튼 클릭)
+    if (previewResult is! Post) return false;
 
     // 3단계: 상세 페이지로 이동
     final detailResult = await Navigator.push<dynamic>(
@@ -107,18 +159,23 @@ class _MainMapScreenState extends State<MainMapScreen> {
       ),
     );
 
-    if (!mounted) return;
+    if (!mounted) return false;
 
     // 상세 페이지에서 돌아올 때 처리
     if (detailResult != null && detailResult is Map) {
       if (detailResult['reopenPreview'] == true) {
-        // 프리뷰 시트 다시 열기
-        await _handlePreviewFlow(previewResult, clusterItems);
+        // 프리뷰 시트 다시 열기 (재귀 호출)
+        return await _handlePreviewFlow(previewResult, clusterItems);
+      } else if (detailResult['reopenGallery'] == true) {
+        // 갤러리로 돌아가기
+        return true;
       }
     } else if (detailResult != null && detailResult is Post) {
       // 업데이트된 포스트로 프리뷰 다시 열기
-      await _handlePreviewFlow(detailResult, clusterItems);
+      return await _handlePreviewFlow(detailResult, clusterItems);
     }
+
+    return false;
   }
 
   Future<Marker> _markerBuilder(Cluster<PostClusterItem> cluster) async {
@@ -138,8 +195,52 @@ class _MainMapScreenState extends State<MainMapScreen> {
       markerId: MarkerId(post.id),
       position: cluster.location,
       icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
-      onTap: () => _handlePreviewFlow(post),
+      onTap: () => _handleSinglePostFlow(post),
     );
+  }
+
+  // 단일 포스트 플로우 처리 (프리뷰 시트가 재귀적으로 열리도록)
+  Future<void> _handleSinglePostFlow(Post post) async {
+    bool shouldReopenPreview = true;
+    Post currentPost = post;
+
+    while (shouldReopenPreview && mounted) {
+      shouldReopenPreview = false;
+
+      final previewResult = await showModalBottomSheet<Post?>(
+        context: context,
+        isScrollControlled: true,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        builder: (_) => MapPostPreview(post: currentPost),
+      );
+
+      if (!mounted || previewResult == null) break;
+
+      // 상세 페이지로 이동
+      final detailResult = await Navigator.push<dynamic>(
+        context,
+        MaterialPageRoute(
+          builder: (_) => PostDetailScreen(post: previewResult),
+        ),
+      );
+
+      if (!mounted) break;
+
+      // 상세 페이지에서 돌아올 때 처리
+      if (detailResult != null && detailResult is Map) {
+        if (detailResult['reopenPreview'] == true) {
+          // 프리뷰 시트 다시 열기
+          shouldReopenPreview = true;
+          currentPost = previewResult;
+        }
+      } else if (detailResult != null && detailResult is Post) {
+        // 업데이트된 포스트로 프리뷰 다시 열기
+        shouldReopenPreview = true;
+        currentPost = detailResult;
+      }
+    }
   }
 
   Future<BitmapDescriptor> _getClusterBitmap(int size, {String? text}) async {
@@ -179,13 +280,14 @@ class _MainMapScreenState extends State<MainMapScreen> {
   Widget build(BuildContext context) {
     final postProvider = context.watch<PostProvider>();
 
-    if (postProvider.state == ViewState.Loading &&
-        postProvider.posts.isEmpty) {
-      return const Center(child: CircularProgressIndicator());
+    // ClusterManager가 없고 데이터가 있으면 초기화
+    if (_clusterManager == null && postProvider.mapPosts.isNotEmpty) {
+      _initClusterManager();
     }
 
-    if (_clusterManager != null) {
-      final items = postProvider.posts
+    // 데이터가 업데이트되면 ClusterManager에 반영
+    if (_clusterManager != null && postProvider.mapPosts.isNotEmpty) {
+      final items = postProvider.mapPosts
           .where((e) => e.location != null)
           .map((p) => PostClusterItem(p))
           .toList();

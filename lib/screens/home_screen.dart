@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:geofeed/providers/my_auth_provider.dart';
+import 'package:geofeed/providers/post_provider.dart';
 import 'package:geofeed/screens/upload_screen.dart';
 import 'package:geofeed/screens/main_map_screen.dart';
 import 'package:geofeed/screens/main_feed_screen.dart';
@@ -8,28 +9,53 @@ import 'package:geofeed/screens/search_screen.dart';
 import 'package:provider/provider.dart';
 
 class HomeScreen extends StatefulWidget {
-  // 외부에서 접근할 수 있는 static 키
   static final GlobalKey<HomeScreenState> homeKey = GlobalKey<HomeScreenState>();
 
-  // 1. 'const' 키워드 삭제
-  // 2. '{super.key}' 삭제 (외부에서 키를 받지 않고 우리가 만든 homeKey를 강제로 씀)
   HomeScreen() : super(key: homeKey);
-
 
   @override
   State<HomeScreen> createState() => HomeScreenState();
 }
 
-// 2. 외부에서 접근해야 하므로 클래스 이름 앞의 '_' 제거 (Public 클래스)
 class HomeScreenState extends State<HomeScreen> {
-  int _selectedIndex = 0; // 0: Map, 1: Feed
+  int _selectedIndex = 0;
+  bool _isInitialLoading = true;
 
   final List<Widget> _screens = const [
     MainMapScreen(),
     MainFeedScreen(),
   ];
 
-  // 3. 탭을 변경하는 메서드 (외부 호출용)
+  @override
+  void initState() {
+    super.initState();
+    // initState에서는 직접 호출하지 않고 Future.microtask 사용
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadInitialData();
+    });
+  }
+
+  // 초기 데이터 로드
+  Future<void> _loadInitialData() async {
+    final postProvider = context.read<PostProvider>();
+
+    try {
+      // 피드용 데이터와 지도용 데이터를 동시에 로드
+      await Future.wait([
+        postProvider.fetchPosts(refresh: true),  // 피드용
+        postProvider.fetchMapPosts(),            // 지도용
+      ]);
+    } catch (e) {
+      print("Initial data load error: $e");
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isInitialLoading = false;
+        });
+      }
+    }
+  }
+
   void changeTab(int index) {
     setState(() {
       _selectedIndex = index;
@@ -38,11 +64,29 @@ class HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // 초기 로딩 중일 때
+    if (_isInitialLoading) {
+      return Scaffold(
+        appBar: AppBar(
+          title: const Text('Geo-Feed'),
+        ),
+        body: const Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              CircularProgressIndicator(),
+              SizedBox(height: 16),
+              Text('게시글을 불러오는 중...'),
+            ],
+          ),
+        ),
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: Text(_selectedIndex == 0 ? '포토스팟 지도' : 'Geo-Feed'),
         actions: [
-          //검색 버튼
           IconButton(
             icon: const Icon(Icons.search),
             onPressed: () {
@@ -52,7 +96,6 @@ class HomeScreenState extends State<HomeScreen> {
               );
             },
           ),
-          // 프로필 버튼
           IconButton(
             icon: const Icon(Icons.account_circle_outlined),
             onPressed: () {
@@ -62,8 +105,6 @@ class HomeScreenState extends State<HomeScreen> {
               );
             },
           ),
-
-          // 로그아웃 버튼 (다이얼로그 포함)
           IconButton(
             icon: const Icon(Icons.logout),
             onPressed: () {
@@ -94,15 +135,14 @@ class HomeScreenState extends State<HomeScreen> {
         ],
       ),
 
-      // 탭 전환 시 화면 유지
-      body: IndexedStack( //현재 IndexedStack으로 selectedIndex에 들어간 값에 따라 보여줄 화면 분기 [MainMapScreen/MainFeedScreen]
+      body: IndexedStack(
         index: _selectedIndex,
         children: _screens,
       ),
 
-      bottomNavigationBar: BottomNavigationBar(// 바텀네비바로 현재 인덱스 표시(기본값 1)
+      bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
-        onTap: (index) {                      //바텀네비의 각 인덱스 클릭시 , 선택된 인덱스의 값 변경, setState로 화면 다시 그리기
+        onTap: (index) {
           setState(() {
             _selectedIndex = index;
           });
@@ -128,10 +168,9 @@ class HomeScreenState extends State<HomeScreen> {
             MaterialPageRoute(builder: (context) => const UploadScreen()),
           );
         },
-        // (수정) 교수님 피드백: 가독성을 위해 흰색 배경 + 검정 아이콘
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
-        elevation: 4.0, // 그림자 추가로 돋보이게
+        elevation: 4.0,
         child: const Icon(Icons.add_a_photo),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,

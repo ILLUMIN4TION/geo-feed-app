@@ -61,19 +61,32 @@ class MyApp extends StatelessWidget {
   }
 }
 
-// 4. 인증 상태에 따라 화면을 분기하는 Wrapper
-class AuthWrapper extends StatelessWidget {
+class AuthWrapper extends StatefulWidget {
   const AuthWrapper({super.key});
 
   @override
+  State<AuthWrapper> createState() => _AuthWrapperState();
+}
+
+class _AuthWrapperState extends State<AuthWrapper> {
+  @override
+  void initState() {
+    super.initState();
+    // 앱 시작 시 데이터 로드
+    Future.microtask(() {
+      context.read<PostProvider>().fetchPosts(refresh: true);
+      context.read<PostProvider>().fetchMapPosts();
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    // StreamProvider가 제공하는 User? 값을 구독
     final firebaseUser = context.watch<User?>();
 
     if (firebaseUser != null) {
-      return  HomeScreen(); // 로그인 시 홈으로
+      return HomeScreen();
     } else {
-      return const LoginScreen(); // 로그아웃 시 로그인으로
+      return const LoginScreen();
     }
   }
 }
