@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:geofeed/providers/my_auth_provider.dart';
 import 'package:geofeed/providers/post_provider.dart';
+import 'package:geofeed/providers/upload_provider.dart';
 import 'package:geofeed/screens/upload_screen.dart';
 import 'package:geofeed/screens/main_map_screen.dart';
 import 'package:geofeed/screens/main_feed_screen.dart';
@@ -11,7 +12,7 @@ import 'package:provider/provider.dart';
 class HomeScreen extends StatefulWidget {
   static final GlobalKey<HomeScreenState> homeKey = GlobalKey<HomeScreenState>();
 
-  HomeScreen() : super(key: homeKey);
+  const HomeScreen({super.key});
 
   @override
   State<HomeScreen> createState() => HomeScreenState();
@@ -29,21 +30,38 @@ class HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    // initState에서는 직접 호출하지 않고 Future.microtask 사용
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadInitialData();
+      _checkLostDataAndRedirect();
     });
   }
 
-  // 초기 데이터 로드
+  Future<void> _checkLostDataAndRedirect() async {
+    final uploadProvider = context.read<UploadProvider>();
+    await uploadProvider.checkLostData();
+
+    if (uploadProvider.pickedImageFile != null && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("촬영된 사진을 복구했습니다."),
+          duration: Duration(seconds: 2),
+        ),
+      );
+      
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const UploadScreen()),
+      );
+    }
+  }
+
   Future<void> _loadInitialData() async {
     final postProvider = context.read<PostProvider>();
 
     try {
-      // 피드용 데이터와 지도용 데이터를 동시에 로드
       await Future.wait([
-        postProvider.fetchPosts(refresh: true),  // 피드용
-        postProvider.fetchMapPosts(),            // 지도용
+        postProvider.fetchPosts(refresh: true),
+        postProvider.fetchMapPosts(),
       ]);
     } catch (e) {
       print("Initial data load error: $e");
@@ -56,7 +74,16 @@ class HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  // ★ 탭 변경 시 데이터 강제 새로고침
   void changeTab(int index) {
+    if (index == 0) {
+      // 지도로 갈 때: 지도 데이터 새로고침
+      context.read<PostProvider>().fetchMapPosts();
+    } else if (index == 1) {
+      // 피드로 갈 때: 피드 데이터 새로고침 (필요하다면 주석 해제)
+      // context.read<PostProvider>().fetchPosts(refresh: true);
+    }
+    
     setState(() {
       _selectedIndex = index;
     });
@@ -64,19 +91,16 @@ class HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // 초기 로딩 중일 때
     if (_isInitialLoading) {
       return Scaffold(
-        appBar: AppBar(
-          title: const Text('Geo-Feed'),
-        ),
+        appBar: AppBar(title: const Text('Geo-Feed')),
         body: const Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               CircularProgressIndicator(),
               SizedBox(height: 16),
-              Text('게시글을 불러오는 중...'),
+              Text('불러오는 중...'),
             ],
           ),
         ),
@@ -143,9 +167,8 @@ class HomeScreenState extends State<HomeScreen> {
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
         onTap: (index) {
-          setState(() {
-            _selectedIndex = index;
-          });
+          // 여기서 changeTab을 호출해야 로직이 수행됨
+          changeTab(index);
         },
         items: const [
           BottomNavigationBarItem(

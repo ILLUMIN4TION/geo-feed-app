@@ -1,7 +1,6 @@
-// lib/screens/post_detail_screen.dart
-
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'dart:io'; 
 import 'package:geofeed/models/post.dart';
 import 'package:geofeed/providers/post_provider.dart';
 import 'package:geofeed/widgets/user_info_header.dart';
@@ -53,11 +52,12 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
       );
     }
 
+    final imageUrl = widget.post.getImageUrl(useThumbnail: false);
+
     return PopScope(
       canPop: false,
       onPopInvoked: (didPop) {
         if (!didPop) {
-          // 뒤로가기 시 프리뷰 시트를 다시 열도록 신호 전달
           Navigator.pop(context, {"reopenPreview": true});
         }
       },
@@ -79,7 +79,6 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                 });
 
                 if (mounted) {
-                  // 업데이트된 포스트를 반환하여 프리뷰 재오픈
                   Navigator.pop(context, updatedPost);
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text("수정 완료!")),
@@ -111,13 +110,30 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                 },
               ),
 
-              CachedNetworkImage(
-                imageUrl: widget.post.imageUrl,
-                fit: BoxFit.cover,
-                width: double.infinity,
-                placeholder: (c, _) =>
-                const Center(child: CircularProgressIndicator()),
-                errorWidget: (c, _, __) => const Icon(Icons.error),
+              // ★ [수정됨] 이미지 클릭 시 전체 화면 뷰어로 이동
+              GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => FullScreenImageViewer(imageUrl: imageUrl),
+                    ),
+                  );
+                },
+                child: Hero(
+                  // Hero 태그를 사용하여 화면 전환 시 이미지가 자연스럽게 확대되는 효과 적용
+                  tag: imageUrl,
+                  child: CachedNetworkImage(
+                    imageUrl: imageUrl, // 원본 사용
+                    fit: BoxFit.cover,
+                    width: double.infinity,
+                    // 메모리 최적화 (뷰어용이 아니므로 적당히 제한)
+                    memCacheWidth: 1080,
+                    placeholder: (c, _) =>
+                    const Center(child: CircularProgressIndicator()),
+                    errorWidget: (c, _, __) => const Icon(Icons.error),
+                  ),
+                ),
               ),
 
               Padding(
@@ -213,6 +229,9 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                     zoom: 15,
                   ),
                   markers: markers,
+                  // 스크롤 뷰 안에 지도가 있으므로 제스처 충돌 방지
+                  gestureRecognizers: {}, 
+                  liteModeEnabled: Platform.isAndroid, // 안드로이드 성능 최적화
                 ),
               ),
 
@@ -251,6 +270,57 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
 
               const SizedBox(height: 50),
             ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ★ [추가됨] 전체 화면 이미지 뷰어 위젯
+class FullScreenImageViewer extends StatelessWidget {
+  final String imageUrl;
+
+  const FullScreenImageViewer({super.key, required this.imageUrl});
+
+  @override
+  Widget build(BuildContext context) {
+    // 화면 전체 크기를 가져옵니다.
+    final Size screenSize = MediaQuery.of(context).size;
+
+    return Scaffold(
+      backgroundColor: Colors.black, // 검은 배경
+      extendBodyBehindAppBar: true, // 앱바 뒤로 내용 확장
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        iconTheme: const IconThemeData(color: Colors.white),
+      ),
+      // 기존 Center 위젯을 제거하고 InteractiveViewer를 body에 바로 배치
+      body: InteractiveViewer(
+        panEnabled: true, // 이동 가능
+        minScale: 0.5,    // 최소 축소 배율
+        maxScale: 4.0,    // 최대 확대 배율
+        
+        // ★ [핵심 변경] InteractiveViewer의 자식 영역을 화면 전체 크기로 설정
+        child: Container(
+          width: screenSize.width,
+          height: screenSize.height,
+          alignment: Alignment.center, // 컨테이너 내부에서 이미지를 중앙 정렬
+          child: Hero(
+            tag: imageUrl, // 상세 페이지와 동일한 태그로 애니메이션 연결
+            child: CachedNetworkImage(
+              imageUrl: imageUrl,
+              fit: BoxFit.contain, // 비율 유지하며 화면 안에 다 들어오게 (초기 상태)
+              placeholder: (context, url) => const Center(
+                child: CircularProgressIndicator(color: Colors.white),
+              ),
+              errorWidget: (context, url, error) => const Icon(
+                Icons.error,
+                color: Colors.white,
+                size: 50,
+              ),
+            ),
           ),
         ),
       ),

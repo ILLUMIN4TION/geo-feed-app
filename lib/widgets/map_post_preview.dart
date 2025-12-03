@@ -1,7 +1,8 @@
-// lib/widgets/map_post_preview.dart
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:geofeed/models/post.dart';
 import 'package:geofeed/widgets/user_info_header.dart';
+import 'package:shimmer/shimmer.dart';
 
 class MapPostPreview extends StatelessWidget {
   final Post post;
@@ -27,7 +28,6 @@ class MapPostPreview extends StatelessWidget {
               IconButton(
                 icon: const Icon(Icons.close),
                 onPressed: () {
-                  // 닫기 버튼: 갤러리로 돌아가는 신호
                   Navigator.pop(context, "backToGallery");
                 },
               ),
@@ -41,11 +41,31 @@ class MapPostPreview extends StatelessWidget {
               children: [
                 ClipRRect(
                   borderRadius: BorderRadius.circular(8.0),
-                  child: Image.network(
-                    post.imageUrl,
+                  child: CachedNetworkImage(
+                    imageUrl: post.getImageUrl(useThumbnail: true),
                     height: 150,
-                    width: 150,
-                    fit: BoxFit.cover,
+                    width: 150, // 표시 크기는 150x150 정사각형
+                    fit: BoxFit.cover, // 비율 유지하며 꽉 채우기 (짤림 발생)
+                    
+                    // ★ [수정] memCacheHeight 제거 -> 비율 유지
+                    // 300 정도로 설정하면 레티나 디스플레이에서도 선명함
+                    memCacheWidth: 300, 
+                    
+                    placeholder: (context, url) => Shimmer.fromColors(
+                      baseColor: Colors.grey[300]!,
+                      highlightColor: Colors.grey[100]!,
+                      child: Container(
+                        height: 150,
+                        width: 150,
+                        color: Colors.white,
+                      ),
+                    ),
+                    errorWidget: (context, url, error) => Container(
+                      height: 150,
+                      width: 150,
+                      color: Colors.grey[200],
+                      child: const Icon(Icons.error),
+                    ),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -82,7 +102,6 @@ class MapPostPreview extends StatelessWidget {
             width: double.infinity,
             child: ElevatedButton(
               onPressed: () {
-                // 여기서 Post를 반환하면 호출자(=MainMapScreen)가 받아서 상세로 push함
                 Navigator.pop(context, post);
               },
               child: const Text("상세 정보 보기"),

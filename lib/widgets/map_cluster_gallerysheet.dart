@@ -1,10 +1,10 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:geofeed/models/post_cluster_item.dart';
-import 'package:geofeed/widgets/map_post_preview.dart';
+import 'package:shimmer/shimmer.dart';
 
 class MapClusterGallerySheet extends StatelessWidget {
   final List<PostClusterItem> items;
-
 
   const MapClusterGallerySheet({
     super.key,
@@ -42,20 +42,33 @@ class MapClusterGallerySheet extends StatelessWidget {
                 crossAxisCount: 3, // 갤러리 형태
                 mainAxisSpacing: 12,
                 crossAxisSpacing: 12,
+                childAspectRatio: 1.0, // 1:1 정사각형 그리드
               ),
               itemBuilder: (_, index) {
                 final post = posts[index];
 
                 return GestureDetector(
                   onTap: () {
-                    // 갤러리 닫으면서 선택한 post 반환
                     Navigator.pop(context, post);
                   },
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(10),
-                    child: Image.network(
-                      post.imageUrl,
-                      fit: BoxFit.cover,
+                    child: CachedNetworkImage(
+                      imageUrl: post.getImageUrl(useThumbnail: true),
+                      fit: BoxFit.cover, // 넘치는 부분은 잘라냄 (비율 유지)
+                      
+                      // ★ [수정] memCacheHeight 제거 -> 비율 유지하며 너비만 300으로 맞춤
+                      memCacheWidth: 300, 
+                      
+                      placeholder: (context, url) => Shimmer.fromColors(
+                        baseColor: Colors.grey[300]!,
+                        highlightColor: Colors.grey[100]!,
+                        child: Container(color: Colors.white),
+                      ),
+                      errorWidget: (context, url, error) => Container(
+                        color: Colors.grey[200],
+                        child: const Icon(Icons.broken_image, color: Colors.grey),
+                      ),
                     ),
                   ),
                 );
