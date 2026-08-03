@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:geofeed/models/post.dart';
 import 'package:geofeed/providers/post_provider.dart';
 import 'package:geofeed/screens/profile_screen.dart';
+import 'package:geofeed/utils/theme.dart';
 import 'package:geofeed/widgets/location_text.dart';
 import 'package:provider/provider.dart';
 
@@ -60,18 +61,26 @@ class _UserInfoHeaderState extends State<UserInfoHeader> {
       builder: (context, snapshot) {
         // 로딩 중
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const ListTile(
-            leading: CircleAvatar(backgroundColor: Colors.grey),
-            title: Text("..."),
-            subtitle: Text("..."),
+          return ListTile(
+            leading: CircleAvatar(
+              backgroundColor: AppTheme.bgSurface,
+              child: SizedBox(
+                width: 20, height: 20,
+                child: CircularProgressIndicator(strokeWidth: 2, valueColor: AlwaysStoppedAnimation<Color>(AppTheme.textHint)),
+              ),
+            ),
+            title: Text("...", style: TextStyle(color: AppTheme.textHint)),
           );
         }
 
         // 데이터가 없거나 에러 발생 시
         if (snapshot.hasError || !snapshot.hasData) {
-          return const ListTile(
-            leading: CircleAvatar(backgroundColor: Colors.grey),
-            title: Text("알 수 없는 사용자"),
+          return ListTile(
+            leading: CircleAvatar(
+              backgroundColor: AppTheme.bgSurface,
+              child: const Icon(Icons.person_outline, size: 20),
+            ),
+            title: Text("알 수 없는 사용자", style: TextStyle(color: AppTheme.textSecondary)),
           );
         }
 
@@ -89,28 +98,28 @@ class _UserInfoHeaderState extends State<UserInfoHeader> {
               ),
             );
           },
-          // 2. 프로필 이미지
+          // 2. 프로필 이미지 - 현대적인 디자인
           leading: CircleAvatar(
+            radius: 18,
             backgroundImage: (profileImageUrl != null)
                 ? NetworkImage(profileImageUrl)
                 : const AssetImage('assets/images/default_user_image.png')
             as ImageProvider,
-            backgroundColor: Colors.grey[200],
+            backgroundColor: AppTheme.bgSurface,
           ),
-          // 3. 닉네임
+          // 3. 닉네임 - 부드러운 색상
           title: Text(username,
-              style: const TextStyle(fontWeight: FontWeight.bold)),
+              style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: AppTheme.textPrimary)),
 
           // 4. 위치 정보 (LocationText 위젯 사용)
           subtitle: widget.post.location != null
               ? LocationText(location: widget.post.location!)
-              : const Text("위치 정보 없음",
-              style: TextStyle(fontSize: 12, color: Colors.grey)),
+              : Text("위치 정보 없음", style: TextStyle(fontSize: 12, color: AppTheme.textHint)),
 
           // 5. 작성자 본인일 경우 '더보기(...)' 버튼 표시
           trailing: (FirebaseAuth.instance.currentUser?.uid == widget.post.userId)
               ? IconButton(
-            icon: const Icon(Icons.more_horiz),
+            icon: const Icon(Icons.more_horiz, size: 20),
             onPressed: () => _showMoreOptions(context),
           )
               : null,
@@ -128,8 +137,8 @@ class _UserInfoHeaderState extends State<UserInfoHeader> {
           child: Wrap(
             children: [
               ListTile(
-                leading: const Icon(Icons.edit),
-                title: const Text('수정하기'),
+                leading: Icon(Icons.edit, color: AppTheme.textPrimary, size: 20),
+                title: Text('수정하기', style: TextStyle(color: AppTheme.textPrimary)),
                 onTap: () {
                   Navigator.pop(ctx); // 시트 닫기
 
@@ -142,8 +151,8 @@ class _UserInfoHeaderState extends State<UserInfoHeader> {
                 },
               ),
               ListTile(
-                leading: const Icon(Icons.delete, color: Colors.red),
-                title: const Text('삭제하기', style: TextStyle(color: Colors.red)),
+                leading: Icon(Icons.delete_outline, color: AppTheme.errorColor, size: 20),
+                title: Text('삭제하기', style: TextStyle(color: AppTheme.errorColor)),
                 onTap: () {
                   Navigator.pop(ctx); // 시트 닫기
                   _showDeleteConfirmDialog(context);
@@ -161,8 +170,11 @@ class _UserInfoHeaderState extends State<UserInfoHeader> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text("게시물 삭제"),
-        content: const Text("정말로 이 게시물을 삭제하시겠습니까?\n복구할 수 없습니다."),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        titleTextStyle: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: AppTheme.textPrimary),
+        contentTextStyle: const TextStyle(fontSize: 14, color: AppTheme.textSecondary),
+        title: Text("게시물 삭제"),
+        content: Text("정말로 이 게시물을 삭제하시겠습니까?\n복구할 수 없습니다."),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
@@ -180,7 +192,7 @@ class _UserInfoHeaderState extends State<UserInfoHeader> {
 
               if (success && context.mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text("게시물이 삭제되었습니다.")),
+                  SnackBar(content: Text("게시물이 삭제되었습니다."), backgroundColor: AppTheme.successColor, behavior: SnackBarBehavior.floating),
                 );
 
                 // (1) 삭제 후 바텀시트가 닫히게 하고 싶을 때만 수행
@@ -194,7 +206,7 @@ class _UserInfoHeaderState extends State<UserInfoHeader> {
                 }
               }
             },
-            child: const Text("삭제", style: TextStyle(color: Colors.red)),
+            child: Text("삭제", style: TextStyle(color: AppTheme.errorColor)),
           ),
         ],
       ),
@@ -209,10 +221,13 @@ class _UserInfoHeaderState extends State<UserInfoHeader> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text("게시물 수정"),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        titleTextStyle: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: AppTheme.textPrimary),
+        contentTextStyle: const TextStyle(fontSize: 14, color: AppTheme.textSecondary),
+        title: Text("게시물 수정"),
         content: TextField(
           controller: controller,
-          decoration: const InputDecoration(hintText: "새로운 캡션을 입력하세요"),
+          decoration: InputDecoration(hintText: "새로운 캡션을 입력하세요"),
           maxLines: 3,
         ),
         actions: [
@@ -232,7 +247,7 @@ class _UserInfoHeaderState extends State<UserInfoHeader> {
 
               if (context.mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text("게시물이 수정되었습니다.")),
+                  SnackBar(content: Text("게시물이 수정되었습니다."), backgroundColor: AppTheme.successColor, behavior: SnackBarBehavior.floating),
                 );
               }
             },

@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
+import 'package:geofeed/utils/theme.dart';
 
 class LocationText extends StatefulWidget {
   final GeoPoint location;
@@ -64,7 +65,6 @@ class _LocationTextState extends State<LocationText> {
       }
       return "알 수 없는 위치";
     } catch (e) {
-      // print("Geocoding Error: $e");
       return "주소 변환 실패";
     }
   }
@@ -75,20 +75,36 @@ class _LocationTextState extends State<LocationText> {
       future: _addressFuture,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Text("위치 확인 중...",
-              style: TextStyle(fontSize: 12, color: Colors.grey));
+          return Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SizedBox(width: 8, height: 8,
+                child: CircularProgressIndicator(strokeWidth: 1.5, valueColor: AlwaysStoppedAnimation<Color>(AppTheme.textHint)),
+              ),
+              const SizedBox(width: 4),
+              Text("위치 확인 중...", style: TextStyle(fontSize: 12, color: AppTheme.textHint)),
+            ],
+          );
         }
 
         if (snapshot.hasError || !snapshot.hasData) {
-          return const Text("위치 정보 없음",
-              style: TextStyle(fontSize: 12, color: Colors.grey));
+          return Text("위치 정보 없음", style: TextStyle(fontSize: 12, color: AppTheme.textHint));
         }
 
-        return Text(
-          snapshot.data!,
-          style: const TextStyle(fontSize: 12, color: Colors.grey),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
+        return Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.location_on_rounded, size: 12, color: AppTheme.primaryColor),
+            const SizedBox(width: 3),
+            Flexible(
+              child: Text(
+                snapshot.data!,
+                style: TextStyle(fontSize: 12, color: AppTheme.textSecondary.withOpacity(0.85)),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
         );
       },
     );

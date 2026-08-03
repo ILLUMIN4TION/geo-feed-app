@@ -6,6 +6,7 @@ import 'package:geofeed/providers/post_provider.dart';
 import 'package:geofeed/providers/upload_provider.dart';
 import 'package:geofeed/screens/home_screen.dart';
 import 'package:geofeed/screens/auth/login_screen.dart';
+import 'package:geofeed/utils/theme.dart';
 import 'package:provider/provider.dart';
 import 'firebase_options.dart';
 
@@ -51,10 +52,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Geo-Feed',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        primarySwatch: Colors.deepOrange,
-        useMaterial3: true,
-      ),
+      theme: AppTheme.lightTheme,
       // 3. 앱의 첫 진입점
       home: const AuthWrapper(),
     );

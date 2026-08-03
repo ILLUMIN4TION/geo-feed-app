@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:geofeed/providers/post_provider.dart';
+import 'package:geofeed/utils/theme.dart';
 import 'package:geofeed/utils/view_state.dart';
 import 'package:geofeed/widgets/post_card.dart';
 import 'package:provider/provider.dart';
@@ -51,7 +52,9 @@ class _MainFeedScreenState extends State<MainFeedScreen> {
     final provider = context.watch<PostProvider>();
 
     if (provider.state == ViewState.Loading && provider.posts.isEmpty) {
-      return const Center(child: CircularProgressIndicator());
+      return Center(
+        child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation<Color>(AppTheme.primaryColor)),
+      );
     }
 
     return RefreshIndicator(
@@ -63,10 +66,10 @@ class _MainFeedScreenState extends State<MainFeedScreen> {
         itemBuilder: (context, index) {
           if (index == provider.posts.length) {
             return provider.isFetchingMore
-                ? const Padding(
-              padding: EdgeInsets.all(24),
-              child: Center(child: CircularProgressIndicator()),
-            )
+                ? Padding(
+              padding: const EdgeInsets.all(24),
+              child: Center(child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation<Color>(AppTheme.primaryColor))),
+          )
                 : const SizedBox.shrink();
           }
 

@@ -1,0 +1,70 @@
+{
+  "project_info": {
+    "project_number": "880073372925",
+    "project_id": "geofeed-1b88f",
+    "storage_bucket": "geofeed-1b88f.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:880073372925:android:2961ff38b4c92701d13a94",
+        "android_client_info": {
+          "package_name": "com.example.geofeed"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "880073372925-78cnts5a4ef3seh8i1fkhkocgutjt5jv.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.geofeed",
+            "certificate_hash": "6e548c15c28f113abc39855adedfef4cbef17d2c"
+          }
+        },
+        {
+          "client_id": "880073372925-q33unbescgh44nrevfmaloamh1k2m3ak.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.geofeed",
+            "certificate_hash": "39b2a52686314a467555b8750a21ba5008b2d971"
+          }
+        },
+        {
+          "client_id": "880073372925-toql8nb9fn9qio4s3b4tsiu6re45m1ti.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.geofeed",
+            "certificate_hash": "956677ccd32788231c8c08bb09d425cfcc5db759"
+          }
+        },
+        {
+          "client_id": "880073372925-7hd5fb0og8e8rnumak6upgq565aj8fef.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCWSuoa0rbp4coAp-X7AYTHGSd7dXL0_Ww"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "880073372925-7hd5fb0og8e8rnumak6upgq565aj8fef.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "880073372925-un7ncslf2qb4mm1add88s67hka4jq9f4.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.geofeed"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,7 +1,8 @@
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:cloud_firestore/cloud_firestore.dart'; // Timestamp 타입 처리를 위해 필요할 수 있음
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:geofeed/models/post.dart';
+import 'package:geofeed/utils/theme.dart';
 import 'package:geofeed/widgets/expandable_caption.dart';
 import 'package:geofeed/widgets/user_info_header.dart';
 import 'package:geofeed/screens/post_detail_screen.dart';
@@ -120,32 +121,35 @@ class PostCard extends StatelessWidget {
           Row(
             children: [
               IconButton(
-                icon: Icon(
+      icon: Icon(
                   isLiked ? Icons.favorite : Icons.favorite_border,
-                  color: isLiked ? Colors.red : Colors.black,
+                  color: isLiked ? AppTheme.likeColor : null,
                 ),
                 onPressed: () {
                   context.read<PostProvider>().toggleLike(post.id, post.likes);
                 },
               ),
-              Text(
+               Text(
                 "${post.likes.length}명",
-                style: const TextStyle(fontWeight: FontWeight.bold),
+                style: const TextStyle(
+                  fontWeight: FontWeight.w600,
+                  color: AppTheme.textPrimary,
+                ),
               ),
               
               const Spacer(), // 남은 공간을 차지하여 타임스탬프를 오른쪽으로 밈
 
               // ★ 타임스탬프 추가 부분
-              Padding(
-                padding: const EdgeInsets.only(right: 16.0),
-                child: Text(
-                  _formatTimestamp(post.timestamp),
-                  style: const TextStyle(
-                    color: Colors.grey,
-                    fontSize: 12,
-                  ),
-                ),
-              ),
+               Padding(
+                 padding: const EdgeInsets.only(right: 16.0),
+                 child: Text(
+                   _formatTimestamp(post.timestamp),
+                   style: TextStyle(
+                     color: AppTheme.textSecondary.withOpacity(0.7),
+                     fontSize: 12,
+                   ),
+                 ),
+               ),
             ],
           ),
 

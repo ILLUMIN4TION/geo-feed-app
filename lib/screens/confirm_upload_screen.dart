@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:geofeed/providers/upload_provider.dart';
 import 'package:geofeed/providers/post_provider.dart';
-import 'package:geofeed/screens/home_screen.dart';
 import 'package:geofeed/screens/location_picker_screen.dart';
+import 'package:geofeed/utils/theme.dart';
 import 'package:geofeed/utils/view_state.dart';
 import 'package:geofeed/widgets/loading_overlay.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:cloud_firestore/cloud_firestore.dart'; // GeoPoint 때문에 필요
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
 
 class ConfirmUploadScreen extends StatelessWidget {
@@ -21,13 +21,13 @@ class ConfirmUploadScreen extends StatelessWidget {
     if (preparedData == null) {
       return Scaffold(
         appBar: AppBar(title: const Text("공유 전 확인")),
-        body: const Center(
+        body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              CircularProgressIndicator(),
-              SizedBox(height: 16),
-              Text("데이터를 준비하는 중..."),
+              CircularProgressIndicator(valueColor: AlwaysStoppedAnimation<Color>(AppTheme.primaryColor)),
+              const SizedBox(height: 16),
+              Text("데이터를 준비하는 중...", style: TextStyle(color: AppTheme.textSecondary)),
             ],
           ),
         ),
@@ -36,7 +36,11 @@ class ConfirmUploadScreen extends StatelessWidget {
 
     final List<Widget> exifWidgets = preparedData.exifData.entries
         .where((entry) => entry.value != null && entry.value.toString() != 'N/A')
-        .map((entry) => Chip(label: Text("${entry.key}: ${entry.value}")))
+        .map((entry) => Chip(
+          label: Text("${entry.key}: ${entry.value}", style: const TextStyle(fontSize: 12)),
+          backgroundColor: AppTheme.bgSurface,
+          labelStyle: TextStyle(color: AppTheme.textSecondary),
+        ))
         .toList();
 
     final Set<Marker> markers = {};
@@ -64,58 +68,32 @@ class ConfirmUploadScreen extends StatelessWidget {
               if (uploadProvider.state != ViewState.Loading && canUpload)
                 TextButton(
                   onPressed: () async {
-                    // 1. 업로드 실행
                     bool success = await context.read<UploadProvider>().executeUpload();
 
                     if (success && context.mounted) {
-                      // ★ [핵심 수정] 업로드 성공 시 즉시 데이터를 새로고침합니다.
-                      // await를 써서 데이터 로드가 끝난 뒤 화면을 닫을 수도 있고,
-                      // 사용자 경험을 위해 요청만 보내고 화면을 닫을 수도 있습니다.
-                      // 여기서는 요청을 보내놓고 화면을 닫습니다. (비동기)
-                      
                       final postProvider = context.read<PostProvider>();
-                      
-                      // 지도 마커 새로고침 (이게 있어야 맵으로 돌아갔을 때 마커가 뜸)
                       postProvider.fetchMapPosts(); 
-                      
-                      // 피드 목록 새로고침 (피드 탭으로 갔을 때 최신글 보이게)
                       postProvider.fetchPosts(refresh: true);
 
-                      // (선택사항) 만약 업로드 후 무조건 피드 탭으로 보내고 싶다면 아래 주석 해제
-                      // HomeScreen.homeKey.currentState?.changeTab(1);
-
-                      // 스낵바 표시
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
                           content: const Text("업로드 완료!"),
-                          backgroundColor: Colors.green,
+                          backgroundColor: AppTheme.successColor,
                           behavior: SnackBarBehavior.floating,
-                          margin: const EdgeInsets.only(
-                            bottom: 90,
-                            left: 16,
-                            right: 16,
-                          ),
+                          margin: const EdgeInsets.only(bottom: 90, left: 16, right: 16),
                           duration: const Duration(seconds: 2),
                         ),
                       );
 
-                      // 화면 닫기 (메인 화면으로 복귀)
-                      // popUntil을 사용하여 UploadScreen, ConfirmScreen 등을 한 번에 닫음
                       Navigator.of(context).popUntil((route) => route.isFirst);
                       
                     } else if (!success && context.mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
-                          content: Text(
-                              context.read<UploadProvider>().errorMessage ?? "업로드 실패"
-                          ),
-                          backgroundColor: Colors.redAccent,
+                          content: Text(context.read<UploadProvider>().errorMessage ?? "업로드 실패"),
+                          backgroundColor: AppTheme.errorColor,
                           behavior: SnackBarBehavior.floating,
-                          margin: const EdgeInsets.only(
-                            bottom: 90,
-                            left: 16,
-                            right: 16,
-                          ),
+                          margin: const EdgeInsets.only(bottom: 90, left: 16, right: 16),
                         ),
                       );
                     }
@@ -123,8 +101,8 @@ class ConfirmUploadScreen extends StatelessWidget {
                   child: const Text(
                     "공유하기",
                     style: TextStyle(
-                      color: Colors.blue,
-                      fontWeight: FontWeight.bold,
+                      color: AppTheme.primaryColor,
+                      fontWeight: FontWeight.w600,
                       fontSize: 16,
                     ),
                   ),
@@ -135,62 +113,77 @@ class ConfirmUploadScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // 이미지 미리보기
-                Image.file(
-                  preparedData.originalFileForPreview,
+                // 이미지 미리보기 - 모던한 디자인
+                Container(
                   height: 300,
                   width: double.infinity,
-                  fit: BoxFit.cover,
-                ),
-                // 캡션
-                Padding(
-                  padding: const EdgeInsets.all(12.0),
-                  child: Text(
-                    preparedData.caption.isEmpty
-                        ? "(캡션 없음)"
-                        : preparedData.caption,
-                    style: const TextStyle(fontSize: 16),
+                  decoration: BoxDecoration(
+                    color: AppTheme.bgSurface,
+                    borderRadius: const BorderRadius.only(
+                      bottomLeft: Radius.circular(16),
+                      bottomRight: Radius.circular(16),
+                    ),
+                  ),
+                  child: ClipRRect(
+                    borderRadius: const BorderRadius.only(
+                      bottomLeft: Radius.circular(16),
+                      bottomRight: Radius.circular(16),
+                    ),
+                    child: Image.file(
+                      preparedData.originalFileForPreview,
+                      width: double.infinity,
+                      fit: BoxFit.cover,
+                    ),
                   ),
                 ),
-                const Divider(),
+                // 캡션 - 모던한 카드 스타일
+                Container(
+                  margin: const EdgeInsets.all(12),
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: AppTheme.bgSurface.withOpacity(0.5),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    preparedData.caption.isEmpty ? "(캡션 없음)" : preparedData.caption,
+                    style: const TextStyle(fontSize: 15, color: AppTheme.textPrimary),
+                  ),
+                ),
+                Divider(height: 2, color: AppTheme.borderLight),
                 // 위치 수동 설정 UI
                 if (!hasLocation)
                   Container(
-                    width: double.infinity,
-                    margin: const EdgeInsets.all(16.0),
-                    padding: const EdgeInsets.all(16.0),
+                    margin: const EdgeInsets.all(16),
+                    padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: Colors.orange[50],
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: Colors.orange),
+                      color: AppTheme.warningColor.withOpacity(0.08),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: AppTheme.warningColor.withOpacity(0.3)),
                     ),
                     child: Column(
                       children: [
-                        const Icon(Icons.add_location_alt,
-                            color: Colors.orange, size: 40),
+                        Icon(Icons.add_location_alt, color: AppTheme.warningColor, size: 40),
                         const SizedBox(height: 8),
-                        const Text(
+                        Text(
                           "위치 정보가 없는 사진입니다.",
-                          style: TextStyle(
-                            color: Colors.orange,
-                            fontWeight: FontWeight.bold,
-                          ),
+                          style: TextStyle(color: AppTheme.warningColor, fontWeight: FontWeight.w600, fontSize: 15),
                         ),
-                        const Text("지도를 움직여 포토스팟을 지정해주세요."),
+                        const Text("지도를 움직여 포토스팟을 지정해주세요.", style: TextStyle(fontSize: 13)),
                         const SizedBox(height: 12),
                         ElevatedButton.icon(
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.orange,
+                            backgroundColor: AppTheme.warningColor,
                             foregroundColor: Colors.white,
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                           ),
-                          icon: const Icon(Icons.map),
-                          label: const Text("위치 직접 설정하기"),
+                          icon: const Icon(Icons.map, size: 18),
+                          label: const Text("위치 직접 설정하기", style: TextStyle(fontSize: 14)),
                           onPressed: () async {
                             final result = await Navigator.push(
                               context,
-                              MaterialPageRoute(
-                                builder: (context) => const LocationPickerScreen(),
-                              ),
+                              MaterialPageRoute(builder: (context) => const LocationPickerScreen()),
                             );
                             if (result != null && result is LatLng) {
                               context.read<UploadProvider>().updateLocation(
@@ -204,46 +197,44 @@ class ConfirmUploadScreen extends StatelessWidget {
                   ),
                 // EXIF 정보
                 Padding(
-                  padding:
-                  const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
-                  child: Text("촬영 정보 (EXIF)",
-                      style: Theme.of(context).textTheme.titleMedium),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  child: Text("촬영 정보 (EXIF)", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: AppTheme.textPrimary)),
                 ),
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(12.0, 0, 12.0, 12.0),
+                  padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
                   child: exifWidgets.isEmpty
-                      ? const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 16.0),
-                    child: Center(
-                      child: Text(
-                        "이 사진에는 촬영 정보가 없습니다.",
-                        style: TextStyle(color: Colors.grey),
-                      ),
-                    ),
-                  )
+                      ? Container(
+                          padding: const EdgeInsets.symmetric(vertical: 20),
+                          decoration: BoxDecoration(
+                            color: AppTheme.bgSurface.withOpacity(0.5),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Center(child: Text("이 사진에는 촬영 정보가 없습니다.", style: TextStyle(color: AppTheme.textHint))),
+                        )
                       : Wrap(
-                    spacing: 8.0,
-                    runSpacing: 4.0,
-                    children: exifWidgets,
-                  ),
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: exifWidgets,
+                        ),
                 ),
-                const Divider(),
+                Divider(height: 2, color: AppTheme.borderLight),
                 // 지도
                 if (hasLocation) ...[
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                    child: Text("포토스팟 위치",
-                        style: Theme.of(context).textTheme.titleMedium),
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    child: Text("포토스팟 위치", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: AppTheme.textPrimary)),
                   ),
                   Container(
                     height: 250,
-                    padding: const EdgeInsets.all(12.0),
+                    margin: const EdgeInsets.symmetric(horizontal: 16),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: AppTheme.borderLight),
+                    ),
+                    clipBehavior: Clip.antiAlias,
                     child: GoogleMap(
                       initialCameraPosition: CameraPosition(
-                        target: LatLng(
-                          preparedData.location!.latitude,
-                          preparedData.location!.longitude,
-                        ),
+                        target: LatLng(preparedData.location!.latitude, preparedData.location!.longitude),
                         zoom: 15,
                       ),
                       markers: markers,
@@ -251,7 +242,8 @@ class ConfirmUploadScreen extends StatelessWidget {
                       zoomGesturesEnabled: false,
                     ),
                   ),
-                ]
+                ],
+                const SizedBox(height: 24),
               ],
             ),
           ),

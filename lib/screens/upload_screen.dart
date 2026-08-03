@@ -1,18 +1,41 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:geofeed/providers/upload_provider.dart';
 import 'package:geofeed/screens/confirm_upload_screen.dart';
+import 'package:geofeed/utils/theme.dart';
 import 'package:geofeed/utils/view_state.dart';
 import 'package:geofeed/widgets/loading_overlay.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 
-class UploadScreen extends StatelessWidget {
+// 상태 관리를 위해 StatefulWidget으로 변경
+class UploadScreen extends StatefulWidget {
   const UploadScreen({super.key});
 
   @override
+  State<UploadScreen> createState() => _UploadScreenState();
+}
+
+class _UploadScreenState extends State<UploadScreen> {
+  final TextEditingController captionController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    // 화면 진입 시, 혹시 카메라 앱에 다녀오면서 앱이 재시작되었는지 확인하여 데이터 복구
+    // 빌드 후에 실행하기 위해 addPostFrameCallback 사용
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<UploadProvider>().checkLostData();
+    });
+  }
+
+  @override
+  void dispose() {
+    captionController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final TextEditingController captionController = TextEditingController();
     final uploadProvider = context.watch<UploadProvider>();
 
     return Stack(
@@ -21,24 +44,16 @@ class UploadScreen extends StatelessWidget {
           appBar: AppBar(
             title: const Text("새 게시물"),
             actions: [
-              // 로딩 상태가 아닐 때만 '다음' 버튼 활성화
               if (uploadProvider.state != ViewState.Loading)
                 TextButton(
                   onPressed: () async {
-                    // 키보드 숨기기
                     FocusScope.of(context).unfocus();
 
-                    // 'prepare' 메서드 호출
                     bool success = await context.read<UploadProvider>().prepareUploadData(
                       caption: captionController.text.trim(),
                     );
 
-                    // Provider 내부에서 에러 발생 시 setState(ViewState.Error)를 호출하므로
-                    // success가 false라면 로딩 상태는 이미 해제되었을 것입니다.
-                    // 따라서 별도의 finally 블록이나 추가적인 상태 변경은 필요하지 않습니다.
-
                     if (success && context.mounted) {
-                      // 확인 화면으로 이동
                       Navigator.push(
                         context,
                         MaterialPageRoute(builder: (context) => const ConfirmUploadScreen()),
@@ -49,7 +64,7 @@ class UploadScreen extends StatelessWidget {
                           content: Text(
                               context.read<UploadProvider>().errorMessage ?? "데이터 준비 실패"
                           ),
-                          backgroundColor: Colors.redAccent,
+                          backgroundColor: AppTheme.errorColor,
                         ),
                       );
                     }
@@ -57,8 +72,8 @@ class UploadScreen extends StatelessWidget {
                   child: const Text(
                     "다음",
                     style: TextStyle(
-                      color: Colors.blue,
-                      fontWeight: FontWeight.bold,
+                      color: AppTheme.primaryColor,
+                      fontWeight: FontWeight.w600,
                       fontSize: 16,
                     ),
                   ),
@@ -71,73 +86,77 @@ class UploadScreen extends StatelessWidget {
               child: Column(
                 children: [
                   const SizedBox(height: 10),
-
-                  // 이미지 미리보기 및 선택 영역
                   GestureDetector(
                     onTap: () {
-                      // 선택 팝업 띄우기
-                      _showImageSourceActionSheet(context, uploadProvider);
+                      _showImageSourceActionSheet(context);
                     },
                     child: Container(
                       height: 300,
                       width: double.infinity,
-                      color: Colors.grey[200],
-                      child: uploadProvider.pickedImageFile != null
-                          ? Image.file(
-                        uploadProvider.pickedImageFile!, // 선택된 이미지 표시
-                        fit: BoxFit.cover,
-                      )
-                          : const Center(
-                        child: Icon(Icons.add_a_photo, size: 60, color: Colors.grey),
+                      decoration: BoxDecoration(
+                        color: AppTheme.bgSurface,
+                        borderRadius: BorderRadius.circular(12),
                       ),
+                      child: uploadProvider.pickedImageFile != null
+                          ? ClipRRect(
+                              borderRadius: BorderRadius.circular(12),
+                              child: Image.file(
+                                uploadProvider.pickedImageFile!,
+                                fit: BoxFit.cover,
+                              ),
+                            )
+                          : Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.add_a_photo, size: 60, color: AppTheme.textHint.withOpacity(0.6)),
+                                const SizedBox(height: 8),
+                                Text("탭하여 사진 선택", style: TextStyle(color: AppTheme.textHint)),
+                              ],
+                            ),
                     ),
                   ),
-
                   const SizedBox(height: 10),
                   TextField(
                     controller: captionController,
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       hintText: "문구 입력...",
                       border: InputBorder.none,
+                      alignLabelWithHint: true,
                     ),
                     maxLines: 5,
+                    style: const TextStyle(color: AppTheme.textPrimary),
                   ),
-                  const Divider(),
+                  Divider(height: 32, color: AppTheme.borderLight),
                 ],
               ),
             ),
           ),
         ),
-
-        // 로딩 중일 때 오버레이 표시 (Provider 상태에 따라 제어)
         if (uploadProvider.state == ViewState.Loading)
           const LoadingOverlay(),
       ],
     );
   }
 
-  // 갤러리/카메라 선택 바텀 시트
-  void _showImageSourceActionSheet(BuildContext context, UploadProvider provider) {
+  void _showImageSourceActionSheet(BuildContext context) {
     showModalBottomSheet(
       context: context,
       builder: (ctx) => SafeArea(
         child: Wrap(
           children: [
             ListTile(
-              leading: const Icon(Icons.photo_library),
-              title: const Text('갤러리에서 선택'),
+              leading: Icon(Icons.photo_library, color: AppTheme.primaryColor, size: 20),
+              title: Text('갤러리에서 선택', style: TextStyle(color: AppTheme.textPrimary)),
               onTap: () {
                 Navigator.pop(ctx);
-                // 갤러리 소스 전달
                 context.read<UploadProvider>().pickImageForPreview(source: ImageSource.gallery);
               },
             ),
             ListTile(
-              leading: const Icon(Icons.camera_alt),
-              title: const Text('카메라로 촬영'),
+              leading: Icon(Icons.camera_alt, color: AppTheme.primaryColor, size: 20),
+              title: Text('카메라로 촬영', style: TextStyle(color: AppTheme.textPrimary)),
               onTap: () {
                 Navigator.pop(ctx);
-                // 카메라 소스 전달
                 context.read<UploadProvider>().pickImageForPreview(source: ImageSource.camera);
               },
             ),

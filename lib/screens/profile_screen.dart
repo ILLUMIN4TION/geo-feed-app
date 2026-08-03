@@ -7,6 +7,7 @@ import 'package:geofeed/screens/edit_profile_screen.dart';
 import 'package:geofeed/screens/liked_posts_screen.dart';
 import 'package:geofeed/screens/post_detail_screen.dart';
 import 'package:geofeed/screens/user_list_screen.dart';
+import 'package:geofeed/utils/theme.dart';
 import 'package:provider/provider.dart';
 
 class ProfileScreen extends StatelessWidget {
@@ -39,9 +40,8 @@ class ProfileScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(isMe ? "내 프로필" : "프로필"),
+        title: Text(isMe ? "내 프로필" : "프로필", style: TextStyle(color: AppTheme.textPrimary)),
         actions: [
-          // 4. (신규) '내 프로필'일 때만 '좋아요 목록' 버튼 표시
           if (isMe)
             IconButton(
               icon: const Icon(Icons.favorite_border),
@@ -59,10 +59,10 @@ class ProfileScreen extends StatelessWidget {
         stream: postsStream,
         builder: (context, postSnapshot) {
           if (postSnapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
+            return Center(child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation<Color>(AppTheme.primaryColor)));
           }
           if (postSnapshot.hasError) {
-            return Center(child: Text("데이터 오류: ${postSnapshot.error}"));
+            return Center(child: Text("데이터 오류: ${postSnapshot.error}", style: TextStyle(color: AppTheme.textSecondary)));
           }
 
           final posts = postSnapshot.data ?? [];
@@ -70,25 +70,22 @@ class ProfileScreen extends StatelessWidget {
           return CustomScrollView(
             slivers: [
               SliverToBoxAdapter(
-                // 5. 유저 정보 헤더
                 child: StreamBuilder<DocumentSnapshot>(
                   stream: userStream,
                   builder: (context, userSnapshot) {
                     if (!userSnapshot.hasData) {
-                      return const Padding(
-                        padding: EdgeInsets.all(16.0),
-                        child: Center(child: CircularProgressIndicator()),
+                      return Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Center(child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation<Color>(AppTheme.primaryColor))),
                       );
                     }
                     final userData = userSnapshot.data!.data() as Map<String, dynamic>? ?? {};
                     final username = userData['username'] ?? '알 수 없음';
                     final profileImageUrl = userData['profileImageUrl'];
 
-                    // 팔로워/팔로잉 리스트
                     final List followers = userData['followers'] ?? [];
                     final List following = userData['following'] ?? [];
 
-                    // 팔로우 여부 확인
                     final bool isFollowing = followers.contains(currentAuthUser?.uid);
 
                     return Padding(
@@ -97,46 +94,35 @@ class ProfileScreen extends StatelessWidget {
                         children: [
                           Row(
                             children: [
-                              // 프로필 이미지
-                              CircleAvatar(
-                                radius: 40,
-                                backgroundImage: (profileImageUrl != null)
-                                    ? NetworkImage(profileImageUrl)
-                                    : const AssetImage('assets/images/default_user_image.png') as ImageProvider,
-                                backgroundColor: Colors.grey[300],
+                              Container(
+                                width: 80,
+                                height: 80,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: AppTheme.bgSurface,
+                                  border: Border.all(color: AppTheme.borderLight),
+                                ),
+                                child: (profileImageUrl != null)
+                                    ? ClipOval(child: Image.network(profileImageUrl, fit: BoxFit.cover))
+                                    : Icon(Icons.person, size: 40, color: AppTheme.textHint),
                               ),
                               const SizedBox(width: 20),
 
-                              // 스탯 (게시물, 팔로워, 팔로잉)
                               Expanded(
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                                   children: [
                                     _buildStatColumn(context, "게시물", posts.length),
-
-                                    // 1. (수정) 팔로워 (followers.length)
                                     _buildStatColumn(context, "팔로워", followers.length, onTap: () {
                                       Navigator.push(
                                         context,
-                                        MaterialPageRoute(
-                                          builder: (context) => UserListScreen(
-                                            title: "팔로워",
-                                            userIds: followers,
-                                          ),
-                                        ),
+                                        MaterialPageRoute(builder: (context) => UserListScreen(title: "팔로워", userIds: followers)),
                                       );
                                     }),
-
-                                    // 2. (수정) 팔로잉 (following.length)
                                     _buildStatColumn(context, "팔로잉", following.length, onTap: () {
                                       Navigator.push(
                                         context,
-                                        MaterialPageRoute(
-                                          builder: (context) => UserListScreen(
-                                            title: "팔로잉",
-                                            userIds: following,
-                                          ),
-                                        ),
+                                        MaterialPageRoute(builder: (context) => UserListScreen(title: "팔로잉", userIds: following)),
                                       );
                                     }),
                                   ],
@@ -146,29 +132,34 @@ class ProfileScreen extends StatelessWidget {
                           ),
                           const SizedBox(height: 12),
 
-                          // 닉네임 & 버튼
                           Row(
                             children: [
-                              Text(username, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                              Text(username, style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: AppTheme.textPrimary)),
                               const Spacer(),
 
-                              // 버튼 분기 처리
                               if (isMe)
                                 OutlinedButton(
+                                  style: OutlinedButton.styleFrom(
+                                    side: const BorderSide(color: AppTheme.primaryColor),
+                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                  ),
                                   onPressed: () {
-                                    // 프로필 수정 화면으로 이동
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(builder: (context) => const EditProfileScreen()),
                                     );
                                   },
-                                  child: const Text("프로필 수정"),
+                                  child: Text("프로필 수정", style: TextStyle(color: AppTheme.primaryColor)),
                                 )
                               else
                                 ElevatedButton(
                                   style: ElevatedButton.styleFrom(
-                                    backgroundColor: isFollowing ? Colors.grey[300] : Colors.blue,
-                                    foregroundColor: isFollowing ? Colors.black : Colors.white,
+                                    backgroundColor: isFollowing ? AppTheme.borderLight : AppTheme.primaryColor,
+                                    foregroundColor: isFollowing ? AppTheme.textSecondary : Colors.white,
+                                    elevation: 0,
+                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                                   ),
                                   onPressed: () {
                                     context.read<MyAuthProvider>().toggleFollow(targetUserId);
@@ -186,12 +177,11 @@ class ProfileScreen extends StatelessWidget {
 
               const SliverToBoxAdapter(child: Divider()),
 
-              // 6. 게시물 그리드
               if (posts.isEmpty)
                 const SliverToBoxAdapter(
                   child: Padding(
                     padding: EdgeInsets.all(50.0),
-                    child: Center(child: Text("게시물이 없습니다.")),
+                    child: Center(child: Text("게시물이 없습니다.", style: TextStyle(color: Colors.grey))),
                   ),
                 )
               else
@@ -206,11 +196,9 @@ class ProfileScreen extends StatelessWidget {
                       final post = posts[index];
                       return GestureDetector(
                         onTap: () {
-                          // 상세 페이지 이동
                           Navigator.push(
                             context,
-                            MaterialPageRoute(
-                                builder: (context) => PostDetailScreen(post: post)),
+                            MaterialPageRoute(builder: (context) => PostDetailScreen(post: post)),
                           );
                         },
                         child: Image.network(post.imageUrl, fit: BoxFit.cover),
@@ -226,7 +214,6 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  // 스탯 표시 헬퍼 (onTap 지원)
   Widget _buildStatColumn(BuildContext context, String label, int count, {VoidCallback? onTap}) {
     return GestureDetector(
       onTap: onTap,
@@ -234,13 +221,13 @@ class ProfileScreen extends StatelessWidget {
         children: [
           Text(
             count.toString(),
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: AppTheme.textPrimary),
           ),
           Text(
             label,
             style: TextStyle(
               fontSize: 12,
-              color: onTap != null ? Colors.black87 : Colors.grey, // 클릭 가능하면 진하게
+              color: onTap != null ? AppTheme.primaryColor : AppTheme.textHint,
               fontWeight: onTap != null ? FontWeight.w500 : FontWeight.normal,
             ),
           ),

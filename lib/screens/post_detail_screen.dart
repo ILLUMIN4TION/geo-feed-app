@@ -6,6 +6,7 @@ import 'package:geofeed/providers/post_provider.dart';
 import 'package:geofeed/widgets/user_info_header.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geofeed/screens/camera_recipe_screen.dart';
+import 'package:geofeed/utils/theme.dart';
 import 'package:provider/provider.dart';
 
 class PostDetailScreen extends StatefulWidget {
@@ -63,7 +64,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
       },
       child: Scaffold(
         appBar: AppBar(
-          title: const Text("포스트 상세 정보"),
+          title: Text("포스트 상세 정보", style: TextStyle(color: AppTheme.textPrimary)),
           actions: _isEditing
               ? [
             TextButton(
@@ -81,13 +82,13 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                 if (mounted) {
                   Navigator.pop(context, updatedPost);
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text("수정 완료!")),
+                    SnackBar(content: Text("수정 완료!"), backgroundColor: AppTheme.successColor),
                   );
                 }
               },
-              child: const Text(
+              child: Text(
                 "완료",
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: AppTheme.primaryColor),
               ),
             )
           ]
@@ -110,7 +111,6 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                 },
               ),
 
-              // ★ [수정됨] 이미지 클릭 시 전체 화면 뷰어로 이동
               GestureDetector(
                 onTap: () {
                   Navigator.push(
@@ -121,17 +121,17 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                   );
                 },
                 child: Hero(
-                  // Hero 태그를 사용하여 화면 전환 시 이미지가 자연스럽게 확대되는 효과 적용
                   tag: imageUrl,
-                  child: CachedNetworkImage(
-                    imageUrl: imageUrl, // 원본 사용
-                    fit: BoxFit.cover,
-                    width: double.infinity,
-                    // 메모리 최적화 (뷰어용이 아니므로 적당히 제한)
-                    memCacheWidth: 1080,
-                    placeholder: (c, _) =>
-                    const Center(child: CircularProgressIndicator()),
-                    errorWidget: (c, _, __) => const Icon(Icons.error),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.zero,
+                    child: CachedNetworkImage(
+                      imageUrl: imageUrl,
+                      fit: BoxFit.cover,
+                      width: double.infinity,
+                      memCacheWidth: 1080,
+                      placeholder: (c, _) => Center(child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation<Color>(AppTheme.primaryColor))),
+                      errorWidget: (c, _, __) => Icon(Icons.error_outline, size: 48, color: AppTheme.textHint),
+                    ),
                   ),
                 ),
               ),
@@ -141,10 +141,13 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                 child: _isEditing
                     ? TextField(
                   controller: _captionController,
-                  decoration: const InputDecoration(
-                    border: OutlineInputBorder(),
+                  style: TextStyle(color: AppTheme.textPrimary),
+                  decoration: InputDecoration(
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                     hintText: "내용을 입력하세요",
                     filled: true,
+                    fillColor: AppTheme.bgSurface.withOpacity(0.5),
+                    contentPadding: const EdgeInsets.all(16),
                   ),
                   maxLines: null,
                   autofocus: true,
@@ -153,7 +156,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                   widget.post.caption.isEmpty
                       ? "(캡션 없음)"
                       : widget.post.caption,
-                  style: const TextStyle(fontSize: 16),
+                  style: TextStyle(fontSize: 16, color: AppTheme.textPrimary),
                 ),
               ),
 
@@ -169,8 +172,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                           _captionController.text = widget.post.caption;
                         });
                       },
-                      child:
-                      const Text("취소", style: TextStyle(color: Colors.grey)),
+                      child: const Text("취소", style: TextStyle(color: AppTheme.textHint)),
                     ),
                   ),
                 ),
@@ -178,22 +180,18 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
               const Divider(),
 
               Padding(
-                padding:
-                const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-                child: Text("촬영 정보 (EXIF)",
-                    style: Theme.of(context).textTheme.titleMedium),
+                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                child: Text("촬영 정보 (EXIF)", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: AppTheme.textPrimary)),
               ),
 
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
                 child: exifWidgets.isEmpty
-                    ? const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 16.0),
-                  child: Center(
-                    child: Text(
-                      "이 사진에는 촬영 정보가 없습니다.",
-                      style: TextStyle(color: Colors.grey),
-                    ),
+                    ? Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 16.0),
+                  child: Text(
+                    "이 사진에는 촬영 정보가 없습니다.",
+                    style: TextStyle(color: AppTheme.textHint),
                   ),
                 )
                     : Wrap(
@@ -206,16 +204,14 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
               const Divider(),
 
               Padding(
-                padding:
-                const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-                child: Text("포토스팟 위치",
-                    style: Theme.of(context).textTheme.titleMedium),
+                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                child: Text("포토스팟 위치", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: AppTheme.textPrimary)),
               ),
 
               widget.post.location == null
-                  ? const Padding(
-                padding: EdgeInsets.all(16.0),
-                child: Center(child: Text("이 사진에는 위치 정보가 없습니다.")),
+                  ? Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Text("이 사진에는 위치 정보가 없습니다.", style: TextStyle(color: AppTheme.textHint)),
               )
                   : Container(
                 height: 250,
@@ -229,9 +225,8 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                     zoom: 15,
                   ),
                   markers: markers,
-                  // 스크롤 뷰 안에 지도가 있으므로 제스처 충돌 방지
                   gestureRecognizers: {}, 
-                  liteModeEnabled: Platform.isAndroid, // 안드로이드 성능 최적화
+                  liteModeEnabled: Platform.isAndroid,
                 ),
               ),
 
@@ -243,25 +238,21 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                   width: double.infinity,
                   child: ElevatedButton.icon(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.black87,
-                      foregroundColor: Colors.yellowAccent,
+                      backgroundColor: AppTheme.textPrimary,
+                      foregroundColor: AppTheme.accentColor,
                       padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      elevation: 2,
                     ),
                     icon: const Icon(Icons.camera_enhance),
-                    label: const Text(
+                    label: Text(
                       "이 설정값으로 촬영하기 (Beta)",
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                     ),
                     onPressed: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(
-                          builder: (context) =>
-                              CameraRecipeScreen(targetPost: widget.post),
-                        ),
+                        MaterialPageRoute(builder: (_) => CameraRecipeScreen(targetPost: widget.post)),
                       );
                     },
                   ),
@@ -277,7 +268,6 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
   }
 }
 
-// ★ [추가됨] 전체 화면 이미지 뷰어 위젯
 class FullScreenImageViewer extends StatelessWidget {
   final String imageUrl;
 
@@ -285,33 +275,29 @@ class FullScreenImageViewer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // 화면 전체 크기를 가져옵니다.
     final Size screenSize = MediaQuery.of(context).size;
 
     return Scaffold(
-      backgroundColor: Colors.black, // 검은 배경
-      extendBodyBehindAppBar: true, // 앱바 뒤로 내용 확장
+      backgroundColor: Colors.black,
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         iconTheme: const IconThemeData(color: Colors.white),
       ),
-      // 기존 Center 위젯을 제거하고 InteractiveViewer를 body에 바로 배치
       body: InteractiveViewer(
-        panEnabled: true, // 이동 가능
-        minScale: 0.5,    // 최소 축소 배율
-        maxScale: 4.0,    // 최대 확대 배율
-        
-        // ★ [핵심 변경] InteractiveViewer의 자식 영역을 화면 전체 크기로 설정
+        panEnabled: true,
+        minScale: 0.5,
+        maxScale: 4.0,
         child: Container(
           width: screenSize.width,
           height: screenSize.height,
-          alignment: Alignment.center, // 컨테이너 내부에서 이미지를 중앙 정렬
+          alignment: Alignment.center,
           child: Hero(
-            tag: imageUrl, // 상세 페이지와 동일한 태그로 애니메이션 연결
+            tag: imageUrl,
             child: CachedNetworkImage(
               imageUrl: imageUrl,
-              fit: BoxFit.contain, // 비율 유지하며 화면 안에 다 들어오게 (초기 상태)
+              fit: BoxFit.contain,
               placeholder: (context, url) => const Center(
                 child: CircularProgressIndicator(color: Colors.white),
               ),
