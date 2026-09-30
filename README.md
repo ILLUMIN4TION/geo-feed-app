@@ -1,4 +1,4 @@
-# 📍 Geo-Feed (geofeed)
+<img width="1080" height="2400" alt="Screenshot_1790785979" src="https://github.com/user-attachments/assets/0089d138-f19f-4721-92eb-106ae93582b8" /># 📍 Geo-Feed (geofeed)
 
 
 > **사진, 그 사진이 찍힌 위치(포토스팟), 카메라 촬영 설정(EXIF)까지 함께 공유하는 지오-피드 서비스**
@@ -31,23 +31,19 @@
 
 ## 📸 시연 화면 (Screenshots / GIFs)
 
-> 아래 `screenshots/` 폴더에 이미지를 추가한 뒤, 각 셀을 `![](screenshots/파일명.png)` 로 교체해 주세요.
 
 | 지도 (클러스터) | 피드 | 게시글 상세 |
 |:---:|:---:|:---:|
-| 📷 준비 중 | 📷 준비 중 | 📷 준비 중 |
+| <img width="1080" height="2400" alt="Screenshot_1790785979" src="https://github.com/user-attachments/assets/9b6b0494-79f3-427b-8564-5b4990d29478" />
+| <img width="1080" height="2400" alt="Screenshot_1790786078" src="https://github.com/user-attachments/assets/7853a790-52e0-4661-9fe9-48796093d579" />
+| <img width="1080" height="2400" alt="Screenshot_1790786109" src="https://github.com/user-attachments/assets/56b1d18c-5314-47c9-8b48-47749a59b5bd" />
+|
 
-| 업로드 확인 (위치 수정) | 카메라 레시피 | 태그 검색 |
+| 업로드 확인 | 태그 검색 |
 |:---:|:---:|:---:|
-| 📷 준비 중 | 📷 준비 중 | 📷 준비 중 |
-
-**추천 캡처 화면**
-- `main_map.png` — 클러스터 마커가 보이는 메인 지도
-- `cluster_sheet.png` — 클러스터 탭 시 열리는 갤러리 BottomSheet
-- `main_feed.png` — 피드 리스트 (Shimmer 포함 시 GIF)
-- `post_detail.png` — 게시글 상세 (EXIF 칩 + 위치 미니 지도)
-- `upload_confirm.png` — 업로드 전 확인 (위치 마커 수정 화면)
-- `camera_recipe.png` — 카메라 레시피 화면 (히스토그램 ON)
+| <img width="1080" height="2400" alt="Screenshot_1790786178" src="https://github.com/user-attachments/assets/ffbddc01-d4b5-42f5-bb6f-d944014cf1fa" />
+| <img width="1080" height="2400" alt="Screenshot_1790786218" src="https://github.com/user-attachments/assets/f149f2bf-8922-4249-909c-a703089dcc16" />
+|
 
 ---
 
