@@ -1,4 +1,4 @@
-<img width="1080" height="2400" alt="Screenshot_1790785979" src="https://github.com/user-attachments/assets/0089d138-f19f-4721-92eb-106ae93582b8" /># 📍 Geo-Feed (geofeed)
+# 📍 Geo-Feed (geofeed)
 
 
 > **사진, 그 사진이 찍힌 위치(포토스팟), 카메라 촬영 설정(EXIF)까지 함께 공유하는 지오-피드 서비스**
