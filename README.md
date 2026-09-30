@@ -1,11 +1,20 @@
 # 📍 Geo-Feed (geofeed)
 
+
 > **사진, 그 사진이 찍힌 위치(포토스팟), 카메라 촬영 설정(EXIF)까지 함께 공유하는 지오-피드 서비스**
 
 ![Flutter](https://img.shields.io/badge/Flutter-3.35.3-02569B?logo=flutter&logoColor=white)
 ![Dart](https://img.shields.io/badge/Dart-3.9-0175C5?logo=dart&logoColor=white)
 ![Firebase](https://img.shields.io/badge/Firebase-Firestore%20%7C%20Auth%20%7C%20Storage-FFCA28?logo=firebase&logoColor=black)
 ![Platform](https://img.shields.io/badge/Platform-Android-3DDC84?logo=android&logoColor=white)
+
+---
+
+
+## ✍️ 작성자
+
+- **남재현** (1인 개발) — [ILLUMIN4TION](https://github.com/ILLUMIN4TION)
+
 
 ---
 
@@ -19,6 +28,68 @@
 - 그래서 다른 사용자는 지도에서 포토스팟을 발견하고, 상세 화면에서 촬영 정보를 확인한 뒤, 자신의 카메라로 같은 설정으로 촬영할 수 있습니다.
 
 ---
+
+## 📸 시연 화면 (Screenshots / GIFs)
+
+> 아래 `screenshots/` 폴더에 이미지를 추가한 뒤, 각 셀을 `![](screenshots/파일명.png)` 로 교체해 주세요.
+
+| 지도 (클러스터) | 피드 | 게시글 상세 |
+|:---:|:---:|:---:|
+| 📷 준비 중 | 📷 준비 중 | 📷 준비 중 |
+
+| 업로드 확인 (위치 수정) | 카메라 레시피 | 태그 검색 |
+|:---:|:---:|:---:|
+| 📷 준비 중 | 📷 준비 중 | 📷 준비 중 |
+
+**추천 캡처 화면**
+- `main_map.png` — 클러스터 마커가 보이는 메인 지도
+- `cluster_sheet.png` — 클러스터 탭 시 열리는 갤러리 BottomSheet
+- `main_feed.png` — 피드 리스트 (Shimmer 포함 시 GIF)
+- `post_detail.png` — 게시글 상세 (EXIF 칩 + 위치 미니 지도)
+- `upload_confirm.png` — 업로드 전 확인 (위치 마커 수정 화면)
+- `camera_recipe.png` — 카메라 레시피 화면 (히스토그램 ON)
+
+---
+
+
+
+## ✨ 주요 기능 (Key Features)
+
+### 🗺 지도 · 포토스팟
+- **클러스터 지도**: 위치 정보가 있는 모든 게시글을 클러스터 마커로 표시 (`google_maps_cluster_manager_2`)
+- **클러스터 갤러리**: 클러스터 탭 시 그 지역의 게시글을 3열 그리드 BottomSheet로 표시
+- **마커 탭**: 게시글 미리보기 후 상세 화면으로 이동
+- **역지오코딩**: 좌표 → 한글 주소로 변환해 표시 (`geocoding`, ko_KR 로케일)
+
+### 📸 업로드 파이프라인
+1. **사진 선택** — 갤러리 / 카메라 (앱 종료 시에도 `retrieveLostData()`로 촬영분 복구)
+2. **권한 요청** — 위치 · 미디어 위치 · 카메라
+3. **EXIF 파싱** — `exif` 패키지로 Make / Model / Aperture / ShutterSpeed / ISO / FocalLength 추출
+4. **포토스팟 추출** — EXIF의 GPS 태그를 `GeoPoint`로 변환 (없으면 지도에서 직접 지정)
+5. **압축** — WebP 변환, 원본(1080p, q80) + 썸네일(300px, q50) 이중 생성
+6. **위치 확인/수정** — 지도에서 마커 위치 확인 후 수정 가능 (**위치 없이는 업로드 불가**)
+7. **업로드** — Firebase Storage(`uploads/{uid}/...`) + Firestore(`posts`)에 저장
+
+### 📋 피드
+- **무한 스크롤** — 커서 페이지네이션(10개 단위, `startAfterDocument`)
+- **좋아요** — Optimistic Update + 실패 시 Rollback
+- **Shimmer** 로딩 스켈레톤, `CachedNetworkImage` 캐싱 (썸네일/원본 URL 자동 전환)
+
+### 📷 게시글 상세 · 카메라 레시피
+- 상세 화면: 원본 이미지, 위치 미니 지도, EXIF 칩, 좋아요, 캡션 수정, 삭제(Storage 파일까지 함께 삭제)
+- **카메라 레시피**: 해당 게시글의 EXIF 설정(줌, 노출 보정, 포커스, 플래시, 그리드, 히스토그램)으로 인앱 카메라를 열어 같은 장면을 재촬영
+
+### 👤 소셜 · 프로필
+- **인증**: 이메일/비밀번호 + Google 로그인 (Google 첫 로그인 시 Firestore 사용자 문서 자동 생성)
+- **팔로우/언팔로우**, 팔로워·팔로잉 목록
+- **프로필 편집**: 닉네임, 프로필 이미지(Storage 업로드)
+- **태그 검색**: `#태그` 기반 게시글 검색
+- **좋아요한 게시물** 목록
+
+---
+
+
+
 
 ## 🛠 기술 스택 (Tech Stack)
 
@@ -155,38 +226,6 @@ flutter build apk --release
 
 ---
 
-## ✨ 주요 기능 (Key Features)
-
-### 🗺 지도 · 포토스팟
-- **클러스터 지도**: 위치 정보가 있는 모든 게시글을 클러스터 마커로 표시 (`google_maps_cluster_manager_2`)
-- **클러스터 갤러리**: 클러스터 탭 시 그 지역의 게시글을 3열 그리드 BottomSheet로 표시
-- **마커 탭**: 게시글 미리보기 후 상세 화면으로 이동
-- **역지오코딩**: 좌표 → 한글 주소로 변환해 표시 (`geocoding`, ko_KR 로케일)
-
-### 📸 업로드 파이프라인
-1. **사진 선택** — 갤러리 / 카메라 (앱 종료 시에도 `retrieveLostData()`로 촬영분 복구)
-2. **권한 요청** — 위치 · 미디어 위치 · 카메라
-3. **EXIF 파싱** — `exif` 패키지로 Make / Model / Aperture / ShutterSpeed / ISO / FocalLength 추출
-4. **포토스팟 추출** — EXIF의 GPS 태그를 `GeoPoint`로 변환 (없으면 지도에서 직접 지정)
-5. **압축** — WebP 변환, 원본(1080p, q80) + 썸네일(300px, q50) 이중 생성
-6. **위치 확인/수정** — 지도에서 마커 위치 확인 후 수정 가능 (**위치 없이는 업로드 불가**)
-7. **업로드** — Firebase Storage(`uploads/{uid}/...`) + Firestore(`posts`)에 저장
-
-### 📋 피드
-- **무한 스크롤** — 커서 페이지네이션(10개 단위, `startAfterDocument`)
-- **좋아요** — Optimistic Update + 실패 시 Rollback
-- **Shimmer** 로딩 스켈레톤, `CachedNetworkImage` 캐싱 (썸네일/원본 URL 자동 전환)
-
-### 📷 게시글 상세 · 카메라 레시피
-- 상세 화면: 원본 이미지, 위치 미니 지도, EXIF 칩, 좋아요, 캡션 수정, 삭제(Storage 파일까지 함께 삭제)
-- **카메라 레시피**: 해당 게시글의 EXIF 설정(줌, 노출 보정, 포커스, 플래시, 그리드, 히스토그램)으로 인앱 카메라를 열어 같은 장면을 재촬영
-
-### 👤 소셜 · 프로필
-- **인증**: 이메일/비밀번호 + Google 로그인 (Google 첫 로그인 시 Firestore 사용자 문서 자동 생성)
-- **팔로우/언팔로우**, 팔로워·팔로잉 목록
-- **프로필 편집**: 닉네임, 프로필 이미지(Storage 업로드)
-- **태그 검색**: `#태그` 기반 게시글 검색
-- **좋아요한 게시물** 목록
 
 ### 🏗 아키텍처
 
@@ -236,28 +275,5 @@ lib/
 
 ---
 
-## 📸 시연 화면 (Screenshots / GIFs)
 
-> 아래 `screenshots/` 폴더에 이미지를 추가한 뒤, 각 셀을 `![](screenshots/파일명.png)` 로 교체해 주세요.
 
-| 지도 (클러스터) | 피드 | 게시글 상세 |
-|:---:|:---:|:---:|
-| 📷 준비 중 | 📷 준비 중 | 📷 준비 중 |
-
-| 업로드 확인 (위치 수정) | 카메라 레시피 | 태그 검색 |
-|:---:|:---:|:---:|
-| 📷 준비 중 | 📷 준비 중 | 📷 준비 중 |
-
-**추천 캡처 화면**
-- `main_map.png` — 클러스터 마커가 보이는 메인 지도
-- `cluster_sheet.png` — 클러스터 탭 시 열리는 갤러리 BottomSheet
-- `main_feed.png` — 피드 리스트 (Shimmer 포함 시 GIF)
-- `post_detail.png` — 게시글 상세 (EXIF 칩 + 위치 미니 지도)
-- `upload_confirm.png` — 업로드 전 확인 (위치 마커 수정 화면)
-- `camera_recipe.png` — 카메라 레시피 화면 (히스토그램 ON)
-
----
-
-## ✍️ 작성자
-
-- **남재현** (1인 개발) — [ILLUMIN4TION](https://github.com/ILLUMIN4TION)
