@@ -1,7 +1,6 @@
 // lib/widgets/map_cluster_gallerysheet.dart
 import 'package:flutter/material.dart';
 import 'package:geofeed/models/post_cluster_item.dart';
-import 'package:geofeed/models/post.dart';
 
 class MapClusterGallerySheet extends StatelessWidget {
   final List<PostClusterItem> items;
