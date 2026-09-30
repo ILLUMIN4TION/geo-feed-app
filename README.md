@@ -31,19 +31,15 @@
 
 ## 📸 시연 화면 (Screenshots / GIFs)
 
-
 | 지도 (클러스터) | 피드 | 게시글 상세 |
 |:---:|:---:|:---:|
-| <img width="1080" height="2400" alt="Screenshot_1790785979" src="https://github.com/user-attachments/assets/9b6b0494-79f3-427b-8564-5b4990d29478" />
-| <img width="1080" height="2400" alt="Screenshot_1790786078" src="https://github.com/user-attachments/assets/7853a790-52e0-4661-9fe9-48796093d579" />
-| <img width="1080" height="2400" alt="Screenshot_1790786109" src="https://github.com/user-attachments/assets/56b1d18c-5314-47c9-8b48-47749a59b5bd" />
-|
+| <img width="1080" height="2400" alt="Screenshot_1790785979" src="https://github.com/user-attachments/assets/9b6b0494-79f3-427b-8564-5b4990d29478" /> | <img width="1080" height="2400" alt="Screenshot_1790786078" src="https://github.com/user-attachments/assets/7853a790-52e0-4661-9fe9-48796093d579" /> | <img width="1080" height="2400" alt="Screenshot_1790786109" src="https://github.com/user-attachments/assets/56b1d18c-5314-47c9-8b48-47749a59b5bd" /> |
+
+<br>
 
 | 업로드 확인 | 태그 검색 |
-|:---:|:---:|:---:|
-| <img width="1080" height="2400" alt="Screenshot_1790786178" src="https://github.com/user-attachments/assets/ffbddc01-d4b5-42f5-bb6f-d944014cf1fa" />
-| <img width="1080" height="2400" alt="Screenshot_1790786218" src="https://github.com/user-attachments/assets/f149f2bf-8922-4249-909c-a703089dcc16" />
-|
+|:---:|:---:|
+| <img width="1080" height="2400" alt="Screenshot_1790786178" src="https://github.com/user-attachments/assets/ffbddc01-d4b5-42f5-bb6f-d944014cf1fa" /> | <img width="1080" height="2400" alt="Screenshot_1790786218" src="https://github.com/user-attachments/assets/f149f2bf-8922-4249-909c-a703089dcc16" /> |
 
 ---
 
